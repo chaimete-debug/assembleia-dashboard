@@ -1,10 +1,10 @@
 window.StorageService = (() => {
-  const KEY = "dashboard_assembleia_enterprise_v1";
+  const KEY = "dashboard_assembleia_enterprise_v2";
 
   function load() {
     try {
       return JSON.parse(localStorage.getItem(KEY)) || {};
-    } catch {
+    } catch (e) {
       return {};
     }
   }
