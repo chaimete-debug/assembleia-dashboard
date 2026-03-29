@@ -82,7 +82,8 @@ window.UI = (() => {
           <div class="flex flex-wrap gap-3 items-center mb-4">
             <div class="w-full overflow-x-auto no-scrollbar">
               <div id="viewTabs" class="inline-flex min-w-max gap-2 rounded-2xl bg-white border border-slate-200 p-2 shadow-sm">
-                <button type="button" class="tab-btn bg-blue-700 text-white rounded-xl px-4 py-2.5 text-sm font-semibold border border-blue-700 whitespace-nowrap" data-view="all" aria-selected="true">Ver Tudo</button>
+                <button type="button" class="tab-btn bg-blue-700 text-white rounded-xl px-4 py-2.5 text-sm font-semibold border border-blue-700 whitespace-nowrap" data-view="overview" aria-selected="true">Visão Geral</button>
+                <button type="button" class="tab-btn bg-white text-slate-700 rounded-xl px-4 py-2.5 text-sm font-semibold border border-slate-200 whitespace-nowrap" data-view="all" aria-selected="false">Ver Tudo</button>
                 <button type="button" class="tab-btn bg-white text-slate-700 rounded-xl px-4 py-2.5 text-sm font-semibold border border-slate-200 whitespace-nowrap" data-view="igreja" aria-selected="false">Igreja Local</button>
                 <button type="button" class="tab-btn bg-white text-slate-700 rounded-xl px-4 py-2.5 text-sm font-semibold border border-slate-200 whitespace-nowrap" data-view="ministros" aria-selected="false">Pastores / Ministros</button>
                 <button type="button" class="tab-btn bg-white text-slate-700 rounded-xl px-4 py-2.5 text-sm font-semibold border border-slate-200 whitespace-nowrap" data-view="sd" aria-selected="false">Superintendente</button>
@@ -96,45 +97,73 @@ window.UI = (() => {
             </button>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-[1.2fr_1fr_1fr] gap-3 md:gap-4">
-            <div id="riskBanner" class="hidden sm:col-span-2 xl:col-span-3 rounded-2xl border border-red-300 bg-red-50 p-3 md:p-4 text-red-800">
-              <div class="font-bold text-sm md:text-base">Risco operacional</div>
-              <div id="riskBannerText" class="text-xs md:text-sm mt-1">Existem tarefas críticas pendentes.</div>
-            </div>
+          <div id="overviewPanel" class="space-y-4"></div>
 
-            <div class="bg-white border border-slate-200 rounded-2xl p-3 md:p-4">
-              <label class="text-[11px] md:text-xs uppercase tracking-wide text-slate-500 block mb-2">
-                Data da Assembleia Distrital
-              </label>
-              <input id="assemblyDate" type="date" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm" />
-              <p class="text-[11px] md:text-xs text-slate-500 mt-2">
-                Introduza a data oficial da assembleia para calcular automaticamente os prazos.
-              </p>
-            </div>
-
-            <div class="bg-white border border-slate-200 rounded-2xl p-3 md:p-4">
-              <p class="text-[11px] md:text-xs uppercase tracking-wide text-slate-500">
-                Início da janela de 90 dias
-              </p>
-              <h3 id="windowStartLabel" class="text-base sm:text-lg font-extrabold mt-1 leading-tight">—</h3>
-              <p class="text-[11px] md:text-xs text-slate-500 mt-2">
-                Marco inicial da contagem temporal do processo.
-              </p>
-            </div>
-
-            <div class="bg-white border border-slate-200 rounded-2xl p-3 md:p-4 sm:col-span-2 xl:col-span-1">
-              <p class="text-[11px] md:text-xs uppercase tracking-wide text-slate-500">
-                Dias restantes
-              </p>
-              <h3 id="daysRemainingLabel" class="text-base sm:text-lg font-extrabold mt-1 leading-tight">—</h3>
-              <p id="timelineStatus" class="text-[11px] md:text-xs text-slate-500 mt-2 leading-snug">
-                Defina a data da assembleia para activar a timeline.
-              </p>
-            </div>
+          <div id="riskBanner" class="hidden rounded-2xl border border-red-300 bg-red-50 p-3 md:p-4 text-red-800 mt-4">
+            <div class="font-bold text-sm md:text-base">Risco operacional</div>
+            <div id="riskBannerText" class="text-xs md:text-sm mt-1">Existem tarefas críticas pendentes.</div>
           </div>
         </div>
 
         <div id="taskBoard" class="p-3 sm:p-4 md:p-6 space-y-4 md:space-y-5"></div>
+      </div>
+    `;
+  }
+
+  function overviewCards() {
+    return `
+      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4">
+        <div class="bg-white border border-slate-200 rounded-2xl p-3 md:p-4">
+          <p class="text-[11px] md:text-xs uppercase tracking-wide text-slate-500">Data da Assembleia</p>
+          <h3 id="overviewAssemblyDate" class="text-base sm:text-lg font-extrabold mt-1 leading-tight">—</h3>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-3 md:p-4">
+          <p class="text-[11px] md:text-xs uppercase tracking-wide text-slate-500">Início da janela de 90 dias</p>
+          <h3 id="windowStartLabel" class="text-base sm:text-lg font-extrabold mt-1 leading-tight">—</h3>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-3 md:p-4">
+          <p class="text-[11px] md:text-xs uppercase tracking-wide text-slate-500">Dias restantes</p>
+          <h3 id="daysRemainingLabel" class="text-base sm:text-lg font-extrabold mt-1 leading-tight">—</h3>
+          <p id="timelineStatus" class="text-[11px] md:text-xs text-slate-500 mt-2 leading-snug">
+            Defina a data da assembleia para activar a timeline.
+          </p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-3 md:p-4">
+          <label class="text-[11px] md:text-xs uppercase tracking-wide text-slate-500 block mb-2">
+            Data da Assembleia Distrital
+          </label>
+          <input id="assemblyDate" type="date" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
+        <div class="bg-white border border-slate-200 rounded-2xl p-3 md:p-4">
+          <p class="text-[11px] md:text-xs uppercase tracking-wide text-slate-500">Progresso Global</p>
+          <h3 id="kpiProgressGlobal" class="text-lg md:text-2xl font-extrabold mt-1">0%</h3>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-3 md:p-4">
+          <p class="text-[11px] md:text-xs uppercase tracking-wide text-slate-500">Concluídas</p>
+          <h3 id="kpiConcluidas" class="text-lg md:text-2xl font-extrabold mt-1">0</h3>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-3 md:p-4">
+          <p class="text-[11px] md:text-xs uppercase tracking-wide text-slate-500">Em curso</p>
+          <h3 id="kpiEmCurso" class="text-lg md:text-2xl font-extrabold mt-1">0</h3>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-3 md:p-4">
+          <p class="text-[11px] md:text-xs uppercase tracking-wide text-slate-500">Pendentes</p>
+          <h3 id="kpiPendentes" class="text-lg md:text-2xl font-extrabold mt-1">0</h3>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-3 md:p-4">
+          <p class="text-[11px] md:text-xs uppercase tracking-wide text-slate-500">Atrasadas</p>
+          <h3 id="kpiAtrasadas" class="text-lg md:text-2xl font-extrabold mt-1">0</h3>
+        </div>
       </div>
     `;
   }
@@ -201,5 +230,5 @@ window.UI = (() => {
     `;
   }
 
-  return { shell, phaseCard, taskCard };
+  return { shell, overviewCards, phaseCard, taskCard };
 })();
