@@ -49,51 +49,70 @@ window.UI = (() => {
 
   function shell() {
     return `
-      <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-        <div class="bg-gradient-to-r from-blue-700 to-slate-800 text-white p-5 md:p-8">
+      <div class="bg-white rounded-2xl md:rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-700 to-slate-800 text-white p-4 sm:p-5 md:p-8">
           <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-              <p class="uppercase tracking-[0.2em] text-[10px] md:text-sm text-blue-100">Manual 2023 (PT-PT)</p>
-              <h1 class="text-2xl md:text-4xl font-extrabold mt-2 leading-tight">Guia da Assembleia Distrital</h1>
-              <p class="text-sm md:text-lg mt-2 text-slate-100">Igreja do Nazareno · Distrito da Matola</p>
-              <p class="text-xs md:text-base mt-1 text-slate-200">Da Igreja Local até ao Dia da Assembleia</p>
+            <div class="min-w-0">
+              <p class="uppercase tracking-[0.18em] text-[10px] sm:text-xs md:text-sm text-blue-100">Manual 2023 (PT-PT)</p>
+              <h1 class="text-xl sm:text-2xl md:text-4xl font-extrabold mt-2 leading-tight">
+                Guia da Assembleia Distrital
+              </h1>
+              <p class="text-sm sm:text-base md:text-lg mt-2 text-slate-100">
+                Igreja do Nazareno · Distrito da Matola
+              </p>
+              <p class="text-xs sm:text-sm md:text-base mt-1 text-slate-200">
+                Da Igreja Local até ao Dia da Assembleia
+              </p>
             </div>
-            <div class="grid grid-cols-2 gap-3 text-sm max-w-sm">
+
+            <div class="grid grid-cols-2 gap-2 sm:gap-3 w-full lg:w-auto lg:max-w-sm text-xs sm:text-sm">
               <div class="bg-white/10 rounded-2xl p-3 backdrop-blur">
                 <div class="font-semibold">5 Fases</div>
-                <div class="text-slate-200 text-xs mt-1">Fluxo completo</div>
+                <div class="text-slate-200 text-[11px] sm:text-xs mt-1">Fluxo completo</div>
               </div>
               <div class="bg-white/10 rounded-2xl p-3 backdrop-blur">
                 <div class="font-semibold">28ª Assembleia Distrital</div>
-                <div class="text-slate-200 text-xs mt-1">Planeamento distrital</div>
+                <div class="text-slate-200 text-[11px] sm:text-xs mt-1">Planeamento distrital</div>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="p-3 md:p-6 bg-slate-50 border-b border-slate-200">
-          <div class="grid lg:grid-cols-[1.2fr_1fr_1fr] gap-3 md:gap-4 mb-4">
-            <div id="riskBanner" class="hidden lg:col-span-3 rounded-2xl border border-red-300 bg-red-50 p-4 text-red-800">
-              <div class="font-bold">Risco operacional</div>
-              <div id="riskBannerText" class="text-sm mt-1">Existem tarefas críticas pendentes.</div>
+        <div class="p-3 sm:p-4 md:p-6 bg-slate-50 border-b border-slate-200">
+          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-[1.2fr_1fr_1fr] gap-3 md:gap-4 mb-4">
+            <div id="riskBanner" class="hidden sm:col-span-2 xl:col-span-3 rounded-2xl border border-red-300 bg-red-50 p-3 md:p-4 text-red-800">
+              <div class="font-bold text-sm md:text-base">Risco operacional</div>
+              <div id="riskBannerText" class="text-xs md:text-sm mt-1">Existem tarefas críticas pendentes.</div>
             </div>
 
-            <div class="bg-white border border-slate-200 rounded-2xl p-4">
-              <label class="text-xs uppercase tracking-wide text-slate-500 block mb-2">Data da Assembleia Distrital</label>
+            <div class="bg-white border border-slate-200 rounded-2xl p-3 md:p-4">
+              <label class="text-[11px] md:text-xs uppercase tracking-wide text-slate-500 block mb-2">
+                Data da Assembleia Distrital
+              </label>
               <input id="assemblyDate" type="date" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm" />
-              <p class="text-xs text-slate-500 mt-2">Introduza a data oficial da assembleia para calcular automaticamente os prazos.</p>
+              <p class="text-[11px] md:text-xs text-slate-500 mt-2">
+                Introduza a data oficial da assembleia para calcular automaticamente os prazos.
+              </p>
             </div>
 
-            <div class="bg-white border border-slate-200 rounded-2xl p-4">
-              <p class="text-xs uppercase tracking-wide text-slate-500">Início da janela de 90 dias</p>
-              <h3 id="windowStartLabel" class="text-base md:text-lg font-extrabold mt-1">—</h3>
-              <p class="text-xs text-slate-500 mt-2">Marco inicial da contagem temporal do processo.</p>
+            <div class="bg-white border border-slate-200 rounded-2xl p-3 md:p-4">
+              <p class="text-[11px] md:text-xs uppercase tracking-wide text-slate-500">
+                Início da janela de 90 dias
+              </p>
+              <h3 id="windowStartLabel" class="text-base sm:text-lg font-extrabold mt-1 leading-tight">—</h3>
+              <p class="text-[11px] md:text-xs text-slate-500 mt-2">
+                Marco inicial da contagem temporal do processo.
+              </p>
             </div>
 
-            <div class="bg-white border border-slate-200 rounded-2xl p-4">
-              <p class="text-xs uppercase tracking-wide text-slate-500">Dias restantes</p>
-              <h3 id="daysRemainingLabel" class="text-base md:text-lg font-extrabold mt-1">—</h3>
-              <p id="timelineStatus" class="text-xs text-slate-500 mt-2">Defina a data da assembleia para activar a timeline.</p>
+            <div class="bg-white border border-slate-200 rounded-2xl p-3 md:p-4 sm:col-span-2 xl:col-span-1">
+              <p class="text-[11px] md:text-xs uppercase tracking-wide text-slate-500">
+                Dias restantes
+              </p>
+              <h3 id="daysRemainingLabel" class="text-base sm:text-lg font-extrabold mt-1 leading-tight">—</h3>
+              <p id="timelineStatus" class="text-[11px] md:text-xs text-slate-500 mt-2 leading-snug">
+                Defina a data da assembleia para activar a timeline.
+              </p>
             </div>
           </div>
 
@@ -115,7 +134,7 @@ window.UI = (() => {
           </div>
         </div>
 
-        <div id="taskBoard" class="p-3 md:p-6 space-y-4 md:space-y-5"></div>
+        <div id="taskBoard" class="p-3 sm:p-4 md:p-6 space-y-4 md:space-y-5"></div>
       </div>
     `;
   }
