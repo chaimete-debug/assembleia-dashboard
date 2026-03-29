@@ -2,468 +2,741 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Assembleia Distrital · Distrito da Matola</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Assembleia Distrital</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    :root {
-      --bg:#0b0e17;--surface:#111520;--surface2:#181d2e;
-      --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
-      --text:#e8eaf0;--muted:#7a8099;--dim:#4a5068;
-      --accent:#4f7cff;--accent-g:rgba(79,124,255,0.18);
-      --amber:#f5a623;--amber-g:rgba(245,166,35,0.15);
-      --rose:#ff5572;--rose-g:rgba(255,85,114,0.15);
-      --emerald:#00d68f;--emerald-g:rgba(0,214,143,0.15);
-      --slate-c:#8896b3;
-      --success:#00d68f;--warning:#f5a623;--danger:#ff5572;
-      --r:14px;--r-sm:10px;--r-xs:7px;
+    .tab-btn, .phase-card, .task-card, .kpi-card { transition: all 0.2s ease; }
+    .tab-btn[aria-selected="true"] { transform: scale(1.02); }
+    .hidden-force { display: none !important; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    @media (max-width: 640px) {
+      .task-grid-mobile { display: grid; grid-template-columns: 1fr; gap: 0.5rem; }
+      .task-card textarea, .task-card select, .task-card input[type="date"] { font-size: 16px; }
     }
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    html{scroll-behavior:smooth}
-    body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;line-height:1.5}
-    ::-webkit-scrollbar{width:4px;height:4px}
-    ::-webkit-scrollbar-track{background:transparent}
-    ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
-
-    .wrap{max-width:1100px;margin:0 auto;padding:14px}
-    @media(min-width:768px){.wrap{padding:24px}}
-
-    /* Header */
-    .hdr{background:linear-gradient(135deg,#0f1629 0%,#1a0f29 50%,#0f1629 100%);border:1px solid var(--border2);border-radius:var(--r);padding:22px;margin-bottom:14px;position:relative;overflow:hidden}
-    .hdr::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(79,124,255,.12) 0%,transparent 70%);pointer-events:none}
-    .hdr-eye{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;font-family:'JetBrains Mono',monospace}
-    .hdr-title{font-size:clamp(18px,5vw,30px);font-weight:800;color:#fff;line-height:1.15;margin-bottom:4px}
-    .hdr-sub{font-size:12px;color:var(--muted);margin-bottom:14px}
-    .hdr-chips{display:flex;flex-wrap:wrap;gap:6px}
-    .chip{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:20px;padding:4px 11px;font-size:10px;font-weight:600;color:var(--muted);font-family:'JetBrains Mono',monospace}
-
-    /* Date card */
-    .date-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:14px}
-    .date-row{display:flex;flex-direction:column;gap:10px}
-    @media(min-width:600px){.date-row{flex-direction:row;align-items:flex-end}}
-    .date-field{flex:1}
-    .field-lbl{display:block;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;font-family:'JetBrains Mono',monospace}
-    .date-in{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r-sm);padding:9px 13px;font-size:13px;font-family:'JetBrains Mono',monospace;color:var(--text);outline:none;transition:border-color .2s;color-scheme:dark}
-    .date-in:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-g)}
-    .date-info{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r-sm);padding:9px 13px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);min-height:38px;display:flex;align-items:center}
-    .tl-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:9px 13px;font-size:11px;color:var(--muted);margin-top:10px;min-height:36px;font-family:'JetBrains Mono',monospace}
-
-    /* KPIs */
-    .kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-bottom:14px}
-    @media(min-width:480px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
-    @media(min-width:768px){.kpi-grid{grid-template-columns:repeat(5,1fr)}}
-    .kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:13px;position:relative;overflow:hidden}
-    .kpi-lbl{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);font-family:'JetBrains Mono',monospace;margin-bottom:7px}
-    .kpi-val{font-size:24px;font-weight:800;line-height:1;color:#fff}
-    .kpi-bar{position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--border)}
-    .kpi.c-a .kpi-val{color:var(--accent)}.kpi.c-a .kpi-bar{background:var(--accent)}
-    .kpi.c-s .kpi-val{color:var(--success)}.kpi.c-s .kpi-bar{background:var(--success)}
-    .kpi.c-w .kpi-val{color:var(--warning)}.kpi.c-w .kpi-bar{background:var(--warning)}
-    .kpi.c-d .kpi-val{color:var(--danger)}.kpi.c-d .kpi-bar{background:var(--danger)}
-
-    /* Action row */
-    .action-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
-    .tabs-wrap{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-    .tabs-wrap::-webkit-scrollbar{display:none}
-    .tabs-inner{display:flex;gap:4px;min-width:max-content}
-    .tab-btn{padding:7px 14px;border-radius:var(--r-xs);font-size:12px;font-weight:600;font-family:'Sora',sans-serif;color:var(--muted);background:transparent;border:none;cursor:pointer;transition:all .18s;white-space:nowrap}
-    .tab-btn:hover{color:var(--text);background:rgba(255,255,255,.05)}
-    .tab-btn.active{background:var(--accent);color:#fff;box-shadow:0 2px 10px var(--accent-g)}
-    .reset-btn{background:rgba(255,85,114,.08);border:1px solid rgba(255,85,114,.2);border-radius:var(--r-xs);padding:8px 14px;font-size:12px;font-weight:600;color:var(--danger);cursor:pointer;font-family:'Sora',sans-serif;transition:all .18s;white-space:nowrap}
-    .reset-btn:hover{background:rgba(255,85,114,.15)}
-
-    /* Risk */
-    .risk{display:none;background:rgba(255,85,114,.08);border:1px solid rgba(255,85,114,.3);border-radius:var(--r-sm);padding:11px 14px;margin-bottom:14px;gap:10px;align-items:flex-start}
-    .risk.on{display:flex}
-    .risk-ico{font-size:15px;flex-shrink:0;margin-top:1px}
-    .risk-ttl{font-size:12px;font-weight:700;color:var(--danger);margin-bottom:2px}
-    .risk-txt{font-size:11px;color:rgba(255,85,114,.7);font-family:'JetBrains Mono',monospace}
-
-    /* Phase */
-    @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-    .phase{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:11px;overflow:hidden;animation:fadeUp .22s ease both}
-    .phase:nth-child(1){animation-delay:0ms}.phase:nth-child(2){animation-delay:50ms}
-    .phase:nth-child(3){animation-delay:100ms}.phase:nth-child(4){animation-delay:150ms}
-    .phase:nth-child(5){animation-delay:200ms}
-    .phase-hdr{width:100%;text-align:left;padding:17px 18px;cursor:pointer;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;background:none;border:none;color:inherit}
-    .phase-left{flex:1;min-width:0}
-    .phase-top{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:7px}
-    .phase-ico{font-size:15px;line-height:1}
-    .phase-code{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:3px 9px;border-radius:20px;font-family:'JetBrains Mono',monospace}
-    .phase-sub{font-size:10px;color:var(--muted)}
-    .phase-title{font-size:clamp(14px,3vw,18px);font-weight:700;color:#fff;line-height:1.2;margin-bottom:3px}
-    .phase-desc{font-size:11px;color:var(--muted);line-height:1.4;margin-bottom:8px}
-    .phase-range{font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:500;color:var(--muted);margin-bottom:8px}
-    .phase-prog{display:flex;align-items:center;gap:8px}
-    .phase-track{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.07);overflow:hidden}
-    .phase-fill{height:100%;border-radius:2px;transition:width .4s ease;width:0%}
-    .phase-pct{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;flex-shrink:0;min-width:36px;text-align:right}
-    .tog-ico{font-size:20px;font-weight:300;color:var(--muted);flex-shrink:0;margin-top:2px;line-height:1}
-    .phase-body{padding:0 14px 14px}
-    .phase-body.closed{display:none}
-    .tasks-grid{display:grid;gap:9px;grid-template-columns:1fr}
-    @media(min-width:768px){.tasks-grid{grid-template-columns:1fr 1fr}}
-
-    /* Phase colors */
-    .ph-blue .phase-code{background:rgba(79,124,255,.15);color:var(--accent)}
-    .ph-blue .phase-fill{background:var(--accent)}.ph-blue .phase-pct{color:var(--accent)}
-    .ph-amber .phase-code{background:var(--amber-g);color:var(--amber)}
-    .ph-amber .phase-fill{background:var(--amber)}.ph-amber .phase-pct{color:var(--amber)}
-    .ph-rose .phase-code{background:var(--rose-g);color:var(--rose)}
-    .ph-rose .phase-fill{background:var(--rose)}.ph-rose .phase-pct{color:var(--rose)}
-    .ph-emerald .phase-code{background:var(--emerald-g);color:var(--emerald)}
-    .ph-emerald .phase-fill{background:var(--emerald)}.ph-emerald .phase-pct{color:var(--emerald)}
-    .ph-slate .phase-code{background:rgba(136,150,179,.15);color:var(--slate-c)}
-    .ph-slate .phase-fill{background:var(--slate-c)}.ph-slate .phase-pct{color:var(--slate-c)}
-
-    /* Task */
-    .task{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:13px;transition:border-color .18s,box-shadow .18s}
-    .task.done{border-color:rgba(0,214,143,.25);background:rgba(0,214,143,.04)}
-    .task.inp{border-color:rgba(245,166,35,.25);background:rgba(245,166,35,.04)}
-    .task.pri-alta:not(.done):not(.inp){border-color:rgba(255,85,114,.25);background:rgba(255,85,114,.04)}
-    .task.overdue:not(.done){box-shadow:0 0 0 1.5px rgba(255,85,114,.4)}
-    .task.ontrack:not(.done){box-shadow:0 0 0 1.5px rgba(245,166,35,.4)}
-    .task.upcoming:not(.done){box-shadow:0 0 0 1.5px rgba(79,124,255,.35)}
-    .task-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:7px;margin-bottom:9px}
-    .task-id{font-size:10px;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--dim);margin-bottom:2px}
-    .task-ttl{font-size:13px;font-weight:600;color:var(--text);line-height:1.3}
-    .task-owner{font-size:11px;color:var(--muted);margin-top:2px}
-    .pri-badge{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:20px;flex-shrink:0;font-family:'JetBrains Mono',monospace}
-    .pri-badge.alta{background:rgba(255,85,114,.15);color:var(--danger);border:1px solid rgba(255,85,114,.25)}
-    .pri-badge.media{background:rgba(245,166,35,.1);color:var(--amber);border:1px solid rgba(245,166,35,.2)}
-    .pri-badge.baixa{background:rgba(255,255,255,.04);color:var(--dim);border:1px solid var(--border)}
-    .task-hint{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-bottom:3px;line-height:1.4}
-    .task-dep{font-size:11px;color:var(--dim);margin-bottom:9px;line-height:1.4}
-    .task-ctrls{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px}
-    @media(max-width:480px){.task-ctrls{grid-template-columns:1fr}}
-    .task-sel,.task-di{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-xs);padding:8px 10px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--text);outline:none;transition:border-color .18s;color-scheme:dark;cursor:pointer}
-    @media(max-width:640px){.task-sel,.task-di{font-size:16px}}
-    .task-sel:focus,.task-di:focus{border-color:var(--accent)}
-    .task-notes{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xs);padding:8px 10px;font-size:12px;font-family:'Sora',sans-serif;color:var(--text);outline:none;resize:vertical;min-height:56px;transition:border-color .18s}
-    @media(max-width:640px){.task-notes{font-size:16px}}
-    .task-notes:focus{border-color:var(--accent)}
-    .task-notes::placeholder{color:var(--dim)}
   </style>
 </head>
-<body>
-<div id="app"></div>
-<script>
-const D={
-  phases:{
-    "1":{code:"FASE 1",title:"Preparação na Igreja Local",sub:"Até 90 dias antes",desc:"Encerramento do ano estatístico, contas, comissão local e relatório anual do pastor.",color:"blue",icon:"🏛️"},
-    "2":{code:"FASE 2",title:"Reunião Anual da Igreja Local",sub:"Dentro de 90 dias antes",desc:"Convocação, relatórios e eleição de oficiais e delegados.",color:"amber",icon:"📋"},
-    "3":{code:"FASE 3",title:"Preparação Ministerial Individual",sub:"Pastores, ordenados e licenciados",desc:"Relatórios ministeriais, ordenação e renovação de licenças.",color:"rose",icon:"✝️"},
-    "4":{code:"FASE 4",title:"Organização Distrital Pré-Assembleia",sub:"SD + Junta Consultiva",desc:"Logística, comissões, documentação, credenciação e preparação final.",color:"emerald",icon:"⚙️"},
-    "5":{code:"FASE 5",title:"O Dia da Assembleia Distrital",sub:"Dia da Assembleia",desc:"Abertura, registo, relatórios, eleições e encerramento.",color:"slate",icon:"🎯"}
-  },
-  tasks:[
-    {id:"1.1",ph:"1",title:"Encerramento do Ano Estatístico",owner:"Pastor + Secretário",g:["igreja","ministros"],s:-90,e:-85,pri:"media"},
-    {id:"1.2",ph:"1",title:"Nomeação da Comissão de Recomendações",owner:"Pastor",g:["igreja","ministros"],s:-84,e:-80,pri:"media"},
-    {id:"1.3",ph:"1",title:"Auditoria / Revisão das Contas",owner:"Junta da Igreja / Comissão de Auditoria",g:["igreja","juntas"],s:-79,e:-70,pri:"media"},
-    {id:"1.4",ph:"1",title:"Preparação do Relatório Anual do Pastor (RAP)",owner:"Pastor + Secretário + Tesoureiro",g:["igreja","ministros"],s:-69,e:-61,pri:"media"},
-    {id:"2.1",ph:"2",title:"Convocação e Anúncio da Reunião Anual",owner:"Pastor",g:["igreja","ministros"],s:-60,e:-50,pri:"media"},
-    {id:"2.2",ph:"2",title:"Apresentação de Relatórios na Reunião Anual",owner:"Pastor + Líderes Locais",g:["igreja","ministros"],s:-49,e:-40,pri:"media"},
-    {id:"2.3",ph:"2",title:"Eleição de Oficiais, Juntas, Mordomos e Ecónomos",owner:"Membros da Igreja",g:["igreja"],s:-39,e:-30,pri:"media"},
-    {id:"2.4",ph:"2",title:"Eleição de Delegados à Assembleia Distrital",owner:"Membros da Igreja",g:["igreja"],s:-39,e:-30,pri:"media"},
-    {id:"2.5",ph:"2",title:"Certificado de Eleição e Formulários Distritais",owner:"Secretário da Igreja",g:["igreja"],s:-29,e:-20,pri:"media"},
-    {id:"3.1",ph:"3",title:"Relatório Anual dos Ministros Ordenados e Licenciados",owner:"Cada Ministro",g:["ministros"],s:-75,e:-35,pri:"media"},
-    {id:"3.2",ph:"3",title:"Candidatos à Ordenação e Renovação de Licenças",owner:"Candidatos + Junta de Estudos",g:["ministros","juntas"],s:-60,e:-20,pri:"media"},
-    {id:"4.1",ph:"4",title:"Fixação da Data, Local e Logística",owner:"Superintendente + Junta Consultiva",g:["sd","juntas"],s:-60,e:-52,pri:"alta"},
-    {id:"4.2",ph:"4",title:"Nomeação da Comissão de Logística",owner:"Superintendente + Junta Consultiva",g:["sd","juntas"],s:-51,e:-46,pri:"media"},
-    {id:"4.3",ph:"4",title:"Criação das Comissões de Contagem de Votos",owner:"Superintendente + Junta Consultiva",g:["sd","juntas"],s:-45,e:-40,pri:"alta"},
-    {id:"4.4",ph:"4",title:"Revisão da Documentação",owner:"Secretário Distrital",g:["sd"],s:-39,e:-33,pri:"alta"},
-    {id:"4.5",ph:"4",title:"Comissão de Credenciais",owner:"Junta + Secretaria Distrital",g:["juntas"],s:-32,e:-26,pri:"alta"},
-    {id:"4.6",ph:"4",title:"Comissão de Recepção e Acolhimento",owner:"Equipa de apoio distrital",g:["juntas"],s:-25,e:-20,pri:"baixa"},
-    {id:"4.7",ph:"4",title:"Comissão de Protocolo e Ordem",owner:"Equipa de protocolo",g:["juntas"],s:-19,e:-14,pri:"media"},
-    {id:"4.8",ph:"4",title:"Comissão de Som e Equipamentos",owner:"Equipa técnica",g:["juntas"],s:-13,e:-9,pri:"media"},
-    {id:"4.9",ph:"4",title:"Comissão de Alimentação",owner:"Equipa designada",g:["juntas"],s:-8,e:-5,pri:"baixa"},
-    {id:"4.10",ph:"4",title:"Comissão de Segurança",owner:"Equipa de segurança",g:["juntas"],s:-4,e:-1,pri:"baixa"},
-    {id:"5.1",ph:"5",title:"Abertura e Culto de Inauguração",owner:"Oficial que preside",g:["sd"],s:0,e:0,pri:"media"},
-    {id:"5.2",ph:"5",title:"Registo de Delegados e Credenciais",owner:"Secretário Distrital",g:["sd"],s:0,e:0,pri:"media"},
-    {id:"5.3",ph:"5",title:"Apresentação de Relatórios",owner:"Mesa + Relatores",g:["sd","ministros"],s:0,e:0,pri:"media"},
-    {id:"5.4",ph:"5",title:"Eleições",owner:"Assembleia + Comissão de Contagem",g:["juntas"],s:0,e:0,pri:"media"},
-    {id:"5.5",ph:"5",title:"Encerramento, Jornal e Arquivamento",owner:"Secretário Distrital + Mesa",g:["sd"],s:0,e:1,pri:"media"}
-  ],
-  deps:{"2.5":["2.3","2.4"],"4.4":["2.5","3.1"],"4.5":["2.5","3.2"],"5.2":["4.5"],"5.3":["4.4"],"5.4":["4.3","5.2"],"5.5":["5.3","5.4"]}
-};
+<body class="bg-slate-100 text-slate-800 min-h-screen">
+  <div class="max-w-7xl mx-auto p-2 sm:p-3 md:p-6">
+    <div class="bg-white rounded-2xl md:rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+      <!-- Cabeçalho sempre visível -->
+      <div class="bg-gradient-to-r from-sky-500 to-cyan-500 text-white p-4 sm:p-5 md:p-8">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div class="min-w-0">
+            <p class="uppercase tracking-[0.18em] text-[10px] sm:text-xs md:text-sm text-cyan-50">Manual 2023 (PT-PT)</p>
+            <h1 class="text-xl sm:text-2xl md:text-4xl font-extrabold mt-2 leading-tight">Guia da Assembleia Distrital</h1>
+            <p class="text-sm sm:text-base md:text-lg mt-2 text-cyan-50">Igreja do Nazareno · Distrito da Matola</p>
+            <p class="text-xs sm:text-sm md:text-base mt-1 text-cyan-100">Da Igreja Local até ao Dia da Assembleia</p>
+          </div>
 
-const Store=(()=>{
-  const K="assembleia_v4";
-  return{
-    load:()=>{try{return JSON.parse(localStorage.getItem(K))||{}}catch(e){return{}}},
-    save:d=>localStorage.setItem(K,JSON.stringify(d)),
-    clear:()=>localStorage.removeItem(K)
-  };
-})();
+          <div class="grid grid-cols-2 gap-2 sm:gap-3 w-full lg:w-auto lg:max-w-sm text-xs sm:text-sm">
+            <div class="bg-white/15 rounded-2xl p-3 backdrop-blur">
+              <div class="font-semibold">5 Fases</div>
+              <div class="text-cyan-50 text-[11px] sm:text-xs mt-1">Fluxo completo</div>
+            </div>
+            <div class="bg-white/15 rounded-2xl p-3 backdrop-blur">
+              <div class="font-semibold">28ª Assembleia Distrital</div>
+              <div class="text-cyan-50 text-[11px] sm:text-xs mt-1">Planeamento distrital</div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-(function(){
-  const st=Store.load();
-  const fmt=d=>d.toLocaleDateString("pt-PT",{day:"2-digit",month:"long",year:"numeric"});
-  const shift=(b,n)=>{const d=new Date(b);d.setDate(d.getDate()+n);return d};
-  const byId=id=>D.tasks.find(t=>t.id===id);
-  const ts=id=>st[id]||{status:"pendente",date:"",notes:""};
-  const save=()=>Store.save(st);
-  const $=id=>document.getElementById(id);
-  const qa=sel=>[...document.querySelectorAll(sel)];
+      <!-- Tabs sempre no topo da zona operacional -->
+      <div class="p-3 sm:p-4 md:p-6 bg-slate-50 border-b border-slate-200">
+        <div class="flex flex-wrap gap-3 items-center">
+          <div class="w-full overflow-x-auto no-scrollbar">
+            <div id="viewTabs" class="inline-flex min-w-max gap-2 rounded-2xl bg-white border border-slate-200 p-2 shadow-sm">
+              <button type="button" class="tab-btn bg-sky-100 text-sky-800 rounded-xl px-4 py-2.5 text-sm font-semibold border border-sky-200 whitespace-nowrap" data-view="overview" aria-selected="true">Visão Geral</button>
+              <button type="button" class="tab-btn bg-white text-slate-700 rounded-xl px-4 py-2.5 text-sm font-semibold border border-slate-200 whitespace-nowrap" data-view="all" aria-selected="false">Ver Tudo</button>
+              <button type="button" class="tab-btn bg-white text-slate-700 rounded-xl px-4 py-2.5 text-sm font-semibold border border-slate-200 whitespace-nowrap" data-view="igreja" aria-selected="false">Igreja Local</button>
+              <button type="button" class="tab-btn bg-white text-slate-700 rounded-xl px-4 py-2.5 text-sm font-semibold border border-slate-200 whitespace-nowrap" data-view="ministros" aria-selected="false">Pastores / Ministros</button>
+              <button type="button" class="tab-btn bg-white text-slate-700 rounded-xl px-4 py-2.5 text-sm font-semibold border border-slate-200 whitespace-nowrap" data-view="sd" aria-selected="false">Superintendente</button>
+              <button type="button" class="tab-btn bg-white text-slate-700 rounded-xl px-4 py-2.5 text-sm font-semibold border border-slate-200 whitespace-nowrap" data-view="juntas" aria-selected="false">Juntas</button>
+              <button type="button" class="tab-btn bg-white text-slate-700 rounded-xl px-4 py-2.5 text-sm font-semibold border border-slate-200 whitespace-nowrap" data-view="day" aria-selected="false">Modo Dia</button>
+            </div>
+          </div>
 
-  function shell(){
-    $("app").innerHTML=`<div class="wrap">
-<header class="hdr">
-  <p class="hdr-eye">Manual 2023 · Igreja do Nazareno</p>
-  <h1 class="hdr-title">Guia da Assembleia Distrital</h1>
-  <p class="hdr-sub">Distrito da Matola · Da Igreja Local até ao Dia da Assembleia</p>
-  <div class="hdr-chips"><span class="chip">5 Fases</span><span class="chip">26 Tarefas</span><span class="chip">28ª Assembleia</span></div>
-</header>
+          <button type="button" id="resetDataBtn" class="bg-white hover:bg-rose-50 text-rose-700 rounded-2xl px-4 py-2.5 text-sm font-semibold border border-rose-200 w-full sm:w-auto">
+            Limpar Dados
+          </button>
+        </div>
+      </div>
 
-<div class="date-card">
-  <div class="date-row">
-    <div class="date-field"><label class="field-lbl" for="asmDate">Data da Assembleia</label><input id="asmDate" type="date" class="date-in"/></div>
-    <div class="date-field"><label class="field-lbl">Início dos 90 dias</label><div id="win90" class="date-info">—</div></div>
-    <div class="date-field"><label class="field-lbl">Dias restantes</label><div id="daysLeft" class="date-info">—</div></div>
+      <div id="overviewPanel" class="p-3 sm:p-4 md:p-6 space-y-4"></div>
+      <div id="taskBoard" class="p-3 sm:p-4 md:p-6 space-y-4 md:space-y-5 hidden"></div>
+    </div>
   </div>
-  <div id="tlBox" class="tl-box">Defina a data da assembleia para activar a timeline.</div>
-</div>
 
-<div class="kpi-grid">
-  <div class="kpi c-a"><div class="kpi-lbl">Progresso</div><div id="kPct" class="kpi-val">0%</div><div class="kpi-bar"></div></div>
-  <div class="kpi c-s"><div class="kpi-lbl">Concluídas</div><div id="kDone" class="kpi-val">0</div><div class="kpi-bar"></div></div>
-  <div class="kpi c-w"><div class="kpi-lbl">Em curso</div><div id="kInP" class="kpi-val">0</div><div class="kpi-bar"></div></div>
-  <div class="kpi"><div class="kpi-lbl">Pendentes</div><div id="kPend" class="kpi-val">0</div><div class="kpi-bar"></div></div>
-  <div class="kpi c-d"><div class="kpi-lbl">Atrasadas</div><div id="kLate" class="kpi-val">0</div><div class="kpi-bar"></div></div>
-</div>
+  <script>
+    const STORAGE_KEY = "dashboard_assembleia_singlefile_v1";
 
-<div class="action-row">
-  <div class="tabs-wrap"><div class="tabs-inner" id="tabs">
-    <button class="tab-btn active" data-v="all">Ver Tudo</button>
-    <button class="tab-btn" data-v="igreja">Igreja Local</button>
-    <button class="tab-btn" data-v="ministros">Pastores / Ministros</button>
-    <button class="tab-btn" data-v="sd">Superintendente</button>
-    <button class="tab-btn" data-v="juntas">Juntas</button>
-    <button class="tab-btn" data-v="day">Modo Dia</button>
-  </div></div>
-  <button id="resetBtn" class="reset-btn">Limpar Dados</button>
-</div>
-
-<div id="risk" class="risk"><span class="risk-ico">⚠️</span><div><div class="risk-ttl">Risco operacional detectado</div><div id="riskTxt" class="risk-txt">—</div></div></div>
-<div id="board"></div>
-</div>`;
-  }
-
-  function board(view){
-    const grouped={};
-    D.tasks.forEach(t=>{
-      const vis=view==="all"||(view==="day"&&t.ph==="5")||(view!=="all"&&view!=="day"&&t.g.includes(view));
-      if(!vis)return;
-      (grouped[t.ph]=grouped[t.ph]||[]).push(t);
-    });
-    let html="";
-    Object.keys(D.phases).forEach(pid=>{
-      if(!grouped[pid]?.length)return;
-      const ph=D.phases[pid];
-      const th=grouped[pid].map(t=>taskCard(t)).join("");
-      html+=`<section class="phase ph-${ph.color}" data-pid="${pid}">
-<button class="phase-hdr phase-tog">
-  <div class="phase-left">
-    <div class="phase-top"><span class="phase-ico">${ph.icon}</span><span class="phase-code">${ph.code}</span><span class="phase-sub">${ph.sub}</span></div>
-    <h2 class="phase-title">${ph.title}</h2>
-    <p class="phase-desc">${ph.desc}</p>
-    <p class="phase-range">—</p>
-    <div class="phase-prog"><div class="phase-track"><div class="phase-fill" style="width:0%"></div></div><span class="phase-pct">0%</span></div>
-  </div>
-  <span class="tog-ico">−</span>
-</button>
-<div class="phase-body"><div class="tasks-grid">${th}</div></div>
-</section>`;
-    });
-    $("board").innerHTML=html;
-    bindPhase(); bindInputs(); updateTimeline(); updateStyles(); updateProgress();
-  }
-
-  function taskCard(t){
-    const s=ts(t.id);
-    const pm={alta:"Alta",media:"Média",baixa:"Baixa"};
-    return `<article class="task pri-${t.pri}" data-tid="${t.id}">
-<div class="task-hdr">
-  <div><div class="task-id">${t.id}</div><div class="task-ttl">${t.title}</div><div class="task-owner">${t.owner}</div></div>
-  <span class="pri-badge ${t.pri}">${pm[t.pri]}</span>
-</div>
-<div class="task-hint"></div>
-<div class="task-dep"></div>
-<div class="task-ctrls">
-  <select class="task-sel s-sel">
-    <option value="pendente"${s.status==="pendente"?" selected":""}>⬜ Pendente</option>
-    <option value="emcurso"${s.status==="emcurso"?" selected":""}>🟡 Em curso</option>
-    <option value="concluido"${s.status==="concluido"?" selected":""}>✅ Concluído</option>
-  </select>
-  <input class="task-di d-sel" type="date" value="${s.date||""}"/>
-</div>
-<textarea class="task-notes n-inp" rows="2" placeholder="Observações...">${s.notes||""}</textarea>
-</article>`;
-  }
-
-  function bindPhase(){
-    qa(".phase-tog").forEach(btn=>{
-      btn.onclick=()=>{
-        const body=btn.closest(".phase").querySelector(".phase-body");
-        const ico=btn.closest(".phase").querySelector(".tog-ico");
-        body.classList.toggle("closed");
-        ico.textContent=body.classList.contains("closed")?"+":"−";
-      };
-    });
-  }
-
-  function bindInputs(){
-    qa(".s-sel").forEach(el=>el.onchange=e=>{
-      const tid=e.target.closest(".task").dataset.tid;
-      st[tid]=st[tid]||{}; st[tid].status=e.target.value;
-      save(); updateStyles(); updateTimeline(); updateProgress();
-    });
-    qa(".d-sel").forEach(el=>el.onchange=e=>{
-      const tid=e.target.closest(".task").dataset.tid;
-      st[tid]=st[tid]||{}; st[tid].date=e.target.value; save();
-    });
-    qa(".n-inp").forEach(el=>el.oninput=e=>{
-      const tid=e.target.closest(".task").dataset.tid;
-      st[tid]=st[tid]||{}; st[tid].notes=e.target.value; save();
-    });
-  }
-
-  function updateTimeline(){
-    const val=$("asmDate")?.value;
-    const w=$("win90"),dl=$("daysLeft"),tl=$("tlBox");
-    if(!val){
-      if(w)w.textContent="—"; if(dl)dl.textContent="—";
-      if(tl)tl.textContent="Defina a data da assembleia para activar a timeline.";
-      qa(".phase-range").forEach(el=>el.textContent="—");
-      qa(".task-hint").forEach(el=>el.textContent="");
-      qa(".task").forEach(el=>el.classList.remove("overdue","ontrack","upcoming"));
-      return;
-    }
-    const asm=new Date(val+"T00:00:00");
-    const today=new Date(); today.setHours(0,0,0,0);
-    const s90=shift(asm,-90);
-    const diff=Math.ceil((asm-today)/864e5);
-    if(w)w.textContent=fmt(s90);
-    if(dl)dl.textContent=diff>=0?`${diff} dias`:"Realizada";
-
-    qa(".phase").forEach(phEl=>{
-      const pid=phEl.dataset.pid;
-      const pts=D.tasks.filter(t=>t.ph===pid);
-      const rEl=phEl.querySelector(".phase-range");
-      if(!pts.length||!rEl)return;
-      const mn=Math.min(...pts.map(t=>t.s)),mx=Math.max(...pts.map(t=>t.e));
-      const a=shift(asm,mn),b=shift(asm,mx);
-      rEl.textContent=mn===mx?`📅 ${fmt(a)}`:`📅 ${fmt(a)} → ${fmt(b)}`;
-    });
-
-    qa(".task").forEach(el=>{
-      const id=el.dataset.tid,t=byId(id),hint=el.querySelector(".task-hint"),s=ts(id);
-      if(!t||!hint)return;
-      const a=shift(asm,t.s),b=shift(asm,t.e);
-      el.classList.remove("overdue","ontrack","upcoming");
-      let info="";
-      if(s.status==="concluido"){info="✅ Concluída";}
-      else if(today<a){info=`⏳ Começa em ${Math.ceil((a-today)/864e5)} dia(s)`;el.classList.add("upcoming");}
-      else if(today<=b){info=`🟡 Em prazo · ${Math.ceil((b-today)/864e5)} dia(s)`;el.classList.add("ontrack");}
-      else{info=`❌ Atrasada há ${Math.ceil((today-b)/864e5)} dia(s)`;el.classList.add("overdue");}
-      hint.textContent=t.s===t.e?`${fmt(a)} · ${info}`:`${fmt(a)} → ${fmt(b)} · ${info}`;
-    });
-  }
-
-  function updateStyles(){
-    qa(".task").forEach(el=>{
-      const s=ts(el.dataset.tid).status||"pendente";
-      el.classList.remove("done","inp");
-      if(s==="concluido")el.classList.add("done");
-      else if(s==="emcurso")el.classList.add("inp");
-      const depEl=el.querySelector(".task-dep");
-      const deps=D.deps[el.dataset.tid]||[];
-      if(!depEl)return;
-      if(!deps.length){depEl.textContent="";return;}
-      const pend=deps.filter(d=>ts(d).status!=="concluido");
-      depEl.textContent=pend.length?`⚠ Dependências em falta: ${pend.join(", ")}`:`✔ Dependências OK: ${deps.join(", ")}`;
-    });
-  }
-
-  function updateProgress(){
-    let done=0,inp=0,pend=0,late=0,onT=0,soon=0,blocked=false;
-    const risks=[];
-    const val=$("asmDate")?.value;
-    const asm=val?new Date(val+"T00:00:00"):null;
-    const today=new Date(); today.setHours(0,0,0,0);
-
-    D.tasks.forEach(t=>{
-      const s=ts(t.id).status||"pendente";
-      if(s==="concluido")done++;
-      else if(s==="emcurso")inp++;
-      else pend++;
-      if(!asm||s==="concluido")return;
-      const a=shift(asm,t.s),b=shift(asm,t.e);
-      if(today<a)soon++;
-      else if(today<=b)onT++;
-      else{late++;if(t.pri==="alta"){blocked=true;risks.push(`${t.id} atrasada`);}}
-      const deps=D.deps[t.id]||[];
-      if((s==="emcurso"||s==="concluido")&&deps.length){
-        const inv=deps.filter(d=>ts(d).status!=="concluido");
-        if(inv.length){blocked=true;risks.push(`${t.id} depende de ${inv.join(",")}`)}
-      }
-    });
-
-    const total=D.tasks.length,pct=total?Math.round(done/total*100):0;
-    const sv=id=>{const el=$(id);if(el)el.textContent=id==="kPct"?`${pct}%`:id==="kDone"?done:id==="kInP"?inp:id==="kPend"?pend:late};
-    ["kPct","kDone","kInP","kPend","kLate"].forEach(sv);
-
-    qa(".phase").forEach(phEl=>{
-      const cards=qa(".task",phEl);
-      const p=cards.length?Math.round(cards.filter(c=>ts(c.dataset.tid).status==="concluido").length/cards.length*100):0;
-      const f=phEl.querySelector(".phase-fill"),l=phEl.querySelector(".phase-pct");
-      if(f)f.style.width=`${p}%`; if(l)l.textContent=`${p}%`;
-    });
-
-    const tl=$("tlBox");
-    if(tl){
-      if(!asm){tl.textContent="Defina a data para activar a timeline.";tl.style.color="var(--muted)";}
-      else if(blocked){tl.textContent=`⚠️ Atrasadas: ${late} · Em prazo: ${onT} · Próximas: ${soon}`;tl.style.color="var(--danger)";}
-      else{tl.textContent=`✅ Em prazo: ${onT} · Próximas: ${soon} · Atrasadas: ${late}`;tl.style.color="var(--success)";}
-    }
-    const rb=$("risk"),rt=$("riskTxt");
-    if(rb){blocked?rb.classList.add("on"):rb.classList.remove("on");}
-    if(rt&&blocked)rt.textContent=risks.slice(0,4).join(" · ");
-  }
-
-  function bindTabs(){
-    qa(".tab-btn").forEach(btn=>btn.onclick=()=>{
-      const v=btn.dataset.v;
-      st.__view=v; save();
-      qa(".tab-btn").forEach(b=>b.classList.toggle("active",b.dataset.v===v));
-      board(v);
-    });
-  }
-
-  function bindDate(){
-    const inp=$("asmDate"); if(!inp)return;
-    if(st.__date)inp.value=st.__date;
-    inp.onchange=()=>{st.__date=inp.value;save();updateTimeline();updateStyles();updateProgress();};
-  }
-
-  function bindReset(){
-    const btn=$("resetBtn"); if(!btn)return;
-    btn.onclick=()=>{
-      if(!confirm("Limpar todos os dados?"))return;
-      Store.clear(); Object.keys(st).forEach(k=>delete st[k]); init();
+    const PHASES = {
+      "1": { code: "FASE 1", title: "Preparação na Igreja Local", subtitle: "Até 90 dias antes da Assembleia", description: "Encerramento do ano estatístico, contas, comissão local e relatório anual do pastor.", color: "sky" },
+      "2": { code: "FASE 2", title: "Reunião Anual da Igreja Local", subtitle: "Dentro de 90 dias antes da Assembleia Distrital", description: "Convocação, apresentação de relatórios e eleição de oficiais e delegados.", color: "amber" },
+      "3": { code: "FASE 3", title: "Preparação Ministerial Individual", subtitle: "Pastores, ordenados e licenciados", description: "Relatórios ministeriais, ordenação e renovação de licenças.", color: "violet" },
+      "4": { code: "FASE 4", title: "Organização Distrital Pré-Assembleia", subtitle: "Superintendente Distrital + Junta Consultiva", description: "Logística, comissões de apoio, documentação, credenciação e preparação final da assembleia.", color: "emerald" },
+      "5": { code: "FASE 5", title: "O Dia da Assembleia Distrital", subtitle: "Dia da Assembleia", description: "Fluxo operativo do dia: abertura, registo, apresentação de relatórios, eleições e encerramento.", color: "slate" }
     };
-  }
 
-  function init(){
-    shell(); bindTabs(); bindDate(); bindReset();
-    const v=st.__view||"all";
-    qa(".tab-btn").forEach(b=>b.classList.toggle("active",b.dataset.v===v));
-    board(v);
-  }
+    const PHASE_DATE_CONFIG = {
+      "1": { startOffset: -90, endOffset: -61 },
+      "2": { startOffset: -90, endOffset: -1 },
+      "3": { startOffset: -75, endOffset: -15 },
+      "4": { startOffset: -60, endOffset: -1 },
+      "5": { startOffset: 0, endOffset: 0 }
+    };
 
-  document.addEventListener("DOMContentLoaded",init);
-})();
-</script>
+    const TASKS = [
+      { id: "1.1", phase: "1", title: "Encerramento do Ano Estatístico", owner: "Pastor + Secretário", groups: ["igreja","ministros"], startOffset: -90, endOffset: -85, label: "Executar entre", priority: "media" },
+      { id: "1.2", phase: "1", title: "Nomeação da Comissão de Recomendações Local", owner: "Pastor", groups: ["igreja","ministros"], startOffset: -84, endOffset: -80, label: "Executar entre", priority: "media" },
+      { id: "1.3", phase: "1", title: "Auditoria / Revisão das Contas", owner: "Junta da Igreja / Comissão de Auditoria", groups: ["igreja","juntas"], startOffset: -79, endOffset: -70, label: "Executar entre", priority: "media" },
+      { id: "1.4", phase: "1", title: "Preparação do Relatório Anual do Pastor (RAP)", owner: "Pastor + Secretário + Tesoureiro", groups: ["igreja","ministros"], startOffset: -69, endOffset: -61, label: "Executar entre", priority: "media" },
+
+      { id: "2.1", phase: "2", title: "Convocação e Anúncio da Reunião Anual", owner: "Pastor", groups: ["igreja","ministros"], startOffset: -60, endOffset: -50, label: "Executar entre", priority: "media" },
+      { id: "2.2", phase: "2", title: "Apresentação de Relatórios na Reunião Anual", owner: "Pastor + Líderes Locais", groups: ["igreja","ministros"], startOffset: -49, endOffset: -40, label: "Executar entre", priority: "media" },
+      { id: "2.3", phase: "2", title: "Eleição de Oficiais, Juntas, Mordomos e Ecónomos", owner: "Membros da Igreja (voto por cédula)", groups: ["igreja"], startOffset: -39, endOffset: -30, label: "Executar entre", priority: "media" },
+      { id: "2.4", phase: "2", title: "Eleição de Delegados à Assembleia Distrital", owner: "Membros da Igreja (voto por cédula)", groups: ["igreja"], startOffset: -39, endOffset: -30, label: "Executar entre", priority: "media" },
+      { id: "2.5", phase: "2", title: "Certificado de Eleição e Formulários Distritais", owner: "Secretário da Igreja", groups: ["igreja"], startOffset: -29, endOffset: -20, label: "Executar entre", priority: "media" },
+
+      { id: "3.1", phase: "3", title: "Relatório Anual dos Ministros Ordenados e Licenciados", owner: "Cada Ministro", groups: ["ministros"], startOffset: -75, endOffset: -35, label: "Executar entre", priority: "media" },
+      { id: "3.2", phase: "3", title: "Candidatos à Ordenação e Renovação de Licenças", owner: "Candidatos + Junta de Estudos / Credenciais", groups: ["ministros","juntas"], startOffset: -60, endOffset: -20, label: "Executar entre", priority: "media" },
+
+      { id: "4.1", phase: "4", title: "Fixação da Data, Local e Logística", owner: "Superintendente Geral + Junta Consultiva", groups: ["sd","juntas"], startOffset: -60, endOffset: -52, label: "Executar entre", priority: "alta" },
+      { id: "4.2", phase: "4", title: "Nomeação da Comissão de Logística", owner: "Superintendente Distrital + Junta Consultiva", groups: ["sd","juntas"], startOffset: -51, endOffset: -46, label: "Executar entre", priority: "media" },
+      { id: "4.3", phase: "4", title: "Criação das Comissões de Contagem de Votos", owner: "Superintendente Distrital + Junta Consultiva", groups: ["sd","juntas"], startOffset: -45, endOffset: -40, label: "Executar entre", priority: "alta" },
+      { id: "4.4", phase: "4", title: "Revisão da Documentação", owner: "Secretário Distrital", groups: ["sd"], startOffset: -39, endOffset: -33, label: "Executar entre", priority: "alta" },
+      { id: "4.5", phase: "4", title: "Comissão de Credenciais", owner: "Junta designada + Secretaria Distrital", groups: ["juntas"], startOffset: -32, endOffset: -26, label: "Executar entre", priority: "alta" },
+      { id: "4.6", phase: "4", title: "Comissão de Recepção e Acolhimento", owner: "Equipa de apoio distrital", groups: ["juntas"], startOffset: -25, endOffset: -20, label: "Executar entre", priority: "baixa" },
+      { id: "4.7", phase: "4", title: "Comissão de Protocolo e Ordem", owner: "Equipa de protocolo", groups: ["juntas"], startOffset: -19, endOffset: -14, label: "Executar entre", priority: "media" },
+      { id: "4.8", phase: "4", title: "Comissão de Som e Equipamentos", owner: "Equipa técnica", groups: ["juntas"], startOffset: -13, endOffset: -9, label: "Executar entre", priority: "media" },
+      { id: "4.9", phase: "4", title: "Comissão de Alimentação", owner: "Equipa designada", groups: ["juntas"], startOffset: -8, endOffset: -5, label: "Executar entre", priority: "baixa" },
+      { id: "4.10", phase: "4", title: "Comissão de Segurança", owner: "Equipa de segurança", groups: ["juntas"], startOffset: -4, endOffset: -1, label: "Executar entre", priority: "baixa" },
+
+      { id: "5.1", phase: "5", title: "Abertura e Culto de Inauguração", owner: "Oficial que preside", groups: ["sd"], startOffset: 0, endOffset: 0, label: "Executar em", priority: "media" },
+      { id: "5.2", phase: "5", title: "Registo de Delegados e Credenciais", owner: "Secretário Distrital", groups: ["sd"], startOffset: 0, endOffset: 0, label: "Executar em", priority: "media" },
+      { id: "5.3", phase: "5", title: "Apresentação de Relatórios", owner: "Mesa + Relatores", groups: ["sd","ministros"], startOffset: 0, endOffset: 0, label: "Executar em", priority: "media" },
+      { id: "5.4", phase: "5", title: "Eleições", owner: "Assembleia + Comissão de Contagem de Votos", groups: ["juntas"], startOffset: 0, endOffset: 0, label: "Executar em", priority: "media" },
+      { id: "5.5", phase: "5", title: "Encerramento, Jornal e Arquivamento", owner: "Secretário Distrital + Mesa", groups: ["sd"], startOffset: 0, endOffset: 1, label: "Executar entre", priority: "media" }
+    ];
+
+    const DEPENDENCIES = {
+      "2.5": ["2.3", "2.4"],
+      "4.4": ["2.5", "3.1"],
+      "4.5": ["2.5", "3.2"],
+      "5.2": ["4.5"],
+      "5.3": ["4.4"],
+      "5.4": ["4.3", "5.2"],
+      "5.5": ["5.3", "5.4"]
+    };
+
+    const state = loadState();
+
+    function loadState() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+      } catch {
+        return {};
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function getTaskState(id) {
+      return state[id] || { status: "pendente", date: "", notes: "" };
+    }
+
+    function getTask(id) {
+      return TASKS.find(t => t.id === id);
+    }
+
+    function shiftDate(base, offsetDays) {
+      const d = new Date(base);
+      d.setDate(d.getDate() + offsetDays);
+      return d;
+    }
+
+    function formatDatePT(date) {
+      return date.toLocaleDateString("pt-PT", { day: "2-digit", month: "long", year: "numeric" });
+    }
+
+    function setActiveTab(view) {
+      document.querySelectorAll(".tab-btn").forEach(btn => {
+        const active = btn.dataset.view === view;
+        btn.setAttribute("aria-selected", active ? "true" : "false");
+        btn.classList.remove("bg-sky-100", "text-sky-800", "border-sky-200", "shadow-sm", "scale-[1.02]");
+        btn.classList.remove("bg-white", "text-slate-700", "border-slate-200");
+
+        if (active) {
+          btn.classList.add("bg-sky-100", "text-sky-800", "border-sky-200", "shadow-sm", "scale-[1.02]");
+        } else {
+          btn.classList.add("bg-white", "text-slate-700", "border-slate-200");
+        }
+      });
+    }
+
+    function renderOverview() {
+      const panel = document.getElementById("overviewPanel");
+      panel.classList.remove("hidden");
+
+      const metrics = computeMetrics();
+      const criticalCards = metrics.criticalTasks.length
+        ? metrics.criticalTasks.map(item => `
+            <div class="rounded-2xl border border-amber-200 bg-amber-50 p-3">
+              <div class="text-sm font-bold text-amber-800">${item.id} ${item.title}</div>
+              <div class="text-xs text-slate-600 mt-1">${item.reason}</div>
+            </div>
+          `).join("")
+        : `<div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 font-semibold">Nenhuma tarefa crítica em situação de risco.</div>`;
+
+      panel.innerHTML = `
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4">
+          <div class="kpi-card bg-white border border-slate-200 rounded-2xl p-3 md:p-4">
+            <p class="text-[11px] md:text-xs uppercase tracking-wide text-slate-500">Data da Assembleia</p>
+            <h3 id="overviewAssemblyDate" class="text-base sm:text-lg font-extrabold mt-1 leading-tight">—</h3>
+          </div>
+
+          <div class="kpi-card bg-white border border-slate-200 rounded-2xl p-3 md:p-4">
+            <p class="text-[11px] md:text-xs uppercase tracking-wide text-slate-500">Início da janela de 90 dias</p>
+            <h3 id="windowStartLabel" class="text-base sm:text-lg font-extrabold mt-1 leading-tight">—</h3>
+          </div>
+
+          <div class="kpi-card bg-white border border-slate-200 rounded-2xl p-3 md:p-4">
+            <p class="text-[11px] md:text-xs uppercase tracking-wide text-slate-500">Dias restantes</p>
+            <h3 id="daysRemainingLabel" class="text-base sm:text-lg font-extrabold mt-1 leading-tight">—</h3>
+            <p id="timelineStatus" class="text-[11px] md:text-xs text-slate-500 mt-2 leading-snug">Defina a data da assembleia para activar a timeline.</p>
+          </div>
+
+          <div class="kpi-card bg-white border border-slate-200 rounded-2xl p-3 md:p-4">
+            <label class="text-[11px] md:text-xs uppercase tracking-wide text-slate-500 block mb-2">Data da Assembleia Distrital</label>
+            <input id="assemblyDate" type="date" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
+          <div class="kpi-card bg-sky-50 border border-sky-200 rounded-2xl p-3 md:p-4">
+            <p class="text-[11px] md:text-xs uppercase tracking-wide text-slate-500">Progresso Global</p>
+            <h3 id="kpiProgressGlobal" class="text-lg md:text-2xl font-extrabold mt-1 text-sky-800">${metrics.globalProgress}%</h3>
+          </div>
+
+          <div class="kpi-card bg-emerald-50 border border-emerald-200 rounded-2xl p-3 md:p-4">
+            <p class="text-[11px] md:text-xs uppercase tracking-wide text-slate-500">Concluídas</p>
+            <h3 id="kpiConcluidas" class="text-lg md:text-2xl font-extrabold mt-1 text-emerald-800">${metrics.completedCount}</h3>
+          </div>
+
+          <div class="kpi-card bg-amber-50 border border-amber-200 rounded-2xl p-3 md:p-4">
+            <p class="text-[11px] md:text-xs uppercase tracking-wide text-slate-500">Em curso</p>
+            <h3 id="kpiEmCurso" class="text-lg md:text-2xl font-extrabold mt-1 text-amber-800">${metrics.inProgressCount}</h3>
+          </div>
+
+          <div class="kpi-card bg-slate-50 border border-slate-200 rounded-2xl p-3 md:p-4">
+            <p class="text-[11px] md:text-xs uppercase tracking-wide text-slate-500">Pendentes</p>
+            <h3 id="kpiPendentes" class="text-lg md:text-2xl font-extrabold mt-1 text-slate-800">${metrics.pendingCount}</h3>
+          </div>
+
+          <div class="kpi-card bg-rose-50 border border-rose-200 rounded-2xl p-3 md:p-4">
+            <p class="text-[11px] md:text-xs uppercase tracking-wide text-slate-500">Atrasadas</p>
+            <h3 id="kpiAtrasadas" class="text-lg md:text-2xl font-extrabold mt-1 text-rose-800">${metrics.overdueCount}</h3>
+          </div>
+        </div>
+
+        <div id="riskBanner" class="${metrics.blocked ? "" : "hidden"} rounded-2xl border border-rose-200 bg-rose-50 p-3 md:p-4">
+          <div class="font-bold text-sm md:text-base text-rose-800">Risco operacional</div>
+          <div id="riskBannerText" class="text-xs md:text-sm mt-1 text-rose-700">${metrics.riskMessage}</div>
+        </div>
+
+        <div class="space-y-3">
+          <div class="flex items-center justify-between gap-3">
+            <h3 class="text-sm md:text-base font-bold text-slate-800">Tarefas críticas</h3>
+            <span class="text-xs text-slate-500">${metrics.criticalTasks.length} item(ns)</span>
+          </div>
+          <div class="grid md:grid-cols-2 gap-3">
+            ${criticalCards}
+          </div>
+        </div>
+      `;
+
+      const assemblyInput = document.getElementById("assemblyDate");
+      assemblyInput.value = state.__assemblyDate || "";
+      assemblyInput.onchange = () => {
+        state.__assemblyDate = assemblyInput.value;
+        saveState();
+        renderCurrentView();
+      };
+
+      updateTimeline();
+    }
+
+    function phaseTone(phaseColor) {
+      const map = {
+        sky: {
+          card: "border-sky-200 bg-sky-50",
+          badge: "bg-sky-100 text-sky-800",
+          subtitle: "text-sky-700",
+          range: "text-sky-800",
+          progressBg: "bg-sky-100",
+          progressBar: "bg-sky-300",
+          title: "text-sky-800"
+        },
+        amber: {
+          card: "border-amber-200 bg-amber-50",
+          badge: "bg-amber-100 text-amber-800",
+          subtitle: "text-amber-700",
+          range: "text-amber-800",
+          progressBg: "bg-amber-100",
+          progressBar: "bg-amber-300",
+          title: "text-amber-800"
+        },
+        violet: {
+          card: "border-violet-200 bg-violet-50",
+          badge: "bg-violet-100 text-violet-800",
+          subtitle: "text-violet-700",
+          range: "text-violet-800",
+          progressBg: "bg-violet-100",
+          progressBar: "bg-violet-300",
+          title: "text-violet-800"
+        },
+        emerald: {
+          card: "border-emerald-200 bg-emerald-50",
+          badge: "bg-emerald-100 text-emerald-800",
+          subtitle: "text-emerald-700",
+          range: "text-emerald-800",
+          progressBg: "bg-emerald-100",
+          progressBar: "bg-emerald-300",
+          title: "text-emerald-800"
+        },
+        slate: {
+          card: "border-slate-200 bg-slate-50",
+          badge: "bg-slate-100 text-slate-800",
+          subtitle: "text-slate-700",
+          range: "text-slate-800",
+          progressBg: "bg-slate-100",
+          progressBar: "bg-slate-300",
+          title: "text-slate-800"
+        }
+      };
+      return map[phaseColor];
+    }
+
+    function renderTaskBoard(view) {
+      const board = document.getElementById("taskBoard");
+      const grouped = {};
+
+      TASKS.forEach(task => {
+        const visible =
+          view === "all" ||
+          (view === "day" && task.phase === "5") ||
+          (view !== "all" && view !== "day" && task.groups.includes(view));
+
+        if (!visible) return;
+        if (!grouped[task.phase]) grouped[task.phase] = [];
+        grouped[task.phase].push(task);
+      });
+
+      board.innerHTML = Object.keys(PHASES).map(phaseId => {
+        if (!grouped[phaseId] || !grouped[phaseId].length) return "";
+
+        const phase = PHASES[phaseId];
+        const tone = phaseTone(phase.color);
+        const taskCards = grouped[phaseId].map(task => {
+          const saved = getTaskState(task.id);
+          return `
+            <article class="task-card bg-white rounded-2xl border border-slate-200 p-3 md:p-4 shadow-sm" data-task-id="${task.id}">
+              <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <div class="text-sm md:text-base font-bold ${tone.title} leading-snug">${task.id} ${task.title}</div>
+                  <div class="text-xs md:text-sm text-slate-500 mt-1 leading-snug">Responsável: ${task.owner}</div>
+                </div>
+                <span class="shrink-0 text-[11px] px-2 py-1 rounded-full border border-slate-200 bg-slate-50 text-slate-600">${task.priority}</span>
+              </div>
+
+              <div class="task-date-hint text-xs font-semibold ${tone.range} mt-3 leading-snug"></div>
+              <div class="dependency-hint text-xs text-slate-500 mt-1 leading-snug"></div>
+
+              <div class="mt-3 task-grid-mobile md:grid md:grid-cols-2 md:gap-2">
+                <select class="status-select w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm">
+                  <option value="pendente" ${saved.status === "pendente" ? "selected" : ""}>Pendente</option>
+                  <option value="emcurso" ${saved.status === "emcurso" ? "selected" : ""}>Em curso</option>
+                  <option value="concluido" ${saved.status === "concluido" ? "selected" : ""}>Concluído</option>
+                </select>
+                <input class="date-input w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm" type="date" value="${saved.date || ""}" />
+              </div>
+
+              <textarea class="notes-input w-full mt-3 rounded-xl border border-slate-300 px-3 py-2.5 text-sm" rows="3" placeholder="Observações...">${saved.notes || ""}</textarea>
+            </article>
+          `;
+        }).join("");
+
+        return `
+          <section class="phase-card rounded-2xl md:rounded-3xl border ${tone.card} overflow-hidden" data-phase="${phaseId}">
+            <button class="phase-toggle w-full text-left p-4 md:p-6 flex items-start justify-between gap-4">
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 md:gap-3 flex-wrap">
+                  <span class="${tone.badge} text-[11px] md:text-xs font-bold px-3 py-1 rounded-full">${phase.code}</span>
+                  <span class="text-[11px] md:text-sm font-semibold ${tone.subtitle}">${phase.subtitle}</span>
+                </div>
+                <h2 class="text-lg md:text-2xl font-extrabold mt-3 leading-tight">${phase.title}</h2>
+                <p class="text-sm md:text-base text-slate-700 mt-1">${phase.description}</p>
+                <p class="phase-date-range text-xs md:text-sm font-semibold ${tone.range} mt-2">Datas calculadas automaticamente após definir a data da assembleia.</p>
+                <div class="mt-4 max-w-md">
+                  <div class="w-full ${tone.progressBg} h-2 rounded-full">
+                    <div class="progress-bar h-2 rounded-full ${tone.progressBar}" style="width:0%"></div>
+                  </div>
+                  <p class="progress-label text-xs mt-2 ${tone.subtitle} font-semibold">0% concluído</p>
+                </div>
+              </div>
+              <span class="toggle-icon ${tone.subtitle} text-sm font-bold mt-1 shrink-0">−</span>
+            </button>
+
+            <div class="phase-content px-4 md:px-6 pb-4 md:pb-6">
+              <div class="grid md:grid-cols-2 gap-3 md:gap-4">
+                ${taskCards}
+              </div>
+            </div>
+          </section>
+        `;
+      }).join("");
+
+      bindPhaseToggles();
+      bindTaskInputs();
+      updateTimeline();
+      updateTaskStyles();
+      updateProgress();
+    }
+
+    function bindPhaseToggles() {
+      document.querySelectorAll(".phase-toggle").forEach(btn => {
+        btn.onclick = () => {
+          const section = btn.closest(".phase-card");
+          const content = section.querySelector(".phase-content");
+          const icon = section.querySelector(".toggle-icon");
+          const hidden = content.classList.contains("hidden-force");
+          content.classList.toggle("hidden-force");
+          icon.textContent = hidden ? "−" : "+";
+        };
+      });
+    }
+
+    function bindTaskInputs() {
+      document.querySelectorAll(".status-select").forEach(el => {
+        el.onchange = e => {
+          const taskId = e.target.closest(".task-card").dataset.taskId;
+          state[taskId] = state[taskId] || {};
+          state[taskId].status = e.target.value;
+          saveState();
+          updateTaskStyles();
+          updateTimeline();
+          updateProgress();
+          if (state.__activeView === "overview") renderCurrentView();
+        };
+      });
+
+      document.querySelectorAll(".date-input").forEach(el => {
+        el.onchange = e => {
+          const taskId = e.target.closest(".task-card").dataset.taskId;
+          state[taskId] = state[taskId] || {};
+          state[taskId].date = e.target.value;
+          saveState();
+        };
+      });
+
+      document.querySelectorAll(".notes-input").forEach(el => {
+        el.oninput = e => {
+          const taskId = e.target.closest(".task-card").dataset.taskId;
+          state[taskId] = state[taskId] || {};
+          state[taskId].notes = e.target.value;
+          saveState();
+        };
+      });
+    }
+
+    function computeMetrics() {
+      const value = state.__assemblyDate || "";
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const assemblyDate = value ? new Date(value + "T00:00:00") : null;
+
+      let completedCount = 0;
+      let inProgressCount = 0;
+      let pendingCount = 0;
+      let overdueCount = 0;
+      let onTrackCount = 0;
+      let upcomingCount = 0;
+      let blocked = false;
+      const criticalTasks = [];
+      const riskMessages = [];
+
+      TASKS.forEach(task => {
+        const saved = getTaskState(task.id);
+        const status = saved.status || "pendente";
+
+        if (status === "concluido") completedCount++;
+        else if (status === "emcurso") inProgressCount++;
+        else pendingCount++;
+
+        if (!assemblyDate || status === "concluido") return;
+
+        const start = shiftDate(assemblyDate, task.startOffset);
+        const end = shiftDate(assemblyDate, task.endOffset);
+
+        if (today < start) {
+          upcomingCount++;
+        } else if (today >= start && today <= end) {
+          onTrackCount++;
+        } else {
+          overdueCount++;
+          if (task.priority === "alta") {
+            blocked = true;
+            criticalTasks.push({ id: task.id, title: task.title, reason: `Atrasada há ${Math.ceil((today - end) / (1000 * 60 * 60 * 24))} dia(s).` });
+            riskMessages.push(`Tarefa crítica ${task.id} atrasada`);
+          }
+        }
+
+        const deps = DEPENDENCIES[task.id] || [];
+        if ((status === "emcurso" || status === "concluido") && deps.length) {
+          const invalid = deps.filter(depId => getTaskState(depId).status !== "concluido");
+          if (invalid.length) {
+            blocked = true;
+            criticalTasks.push({ id: task.id, title: task.title, reason: `Dependências em falta: ${invalid.join(", ")}.` });
+            riskMessages.push(`Tarefa ${task.id} depende de ${invalid.join(", ")}`);
+          }
+        }
+      });
+
+      const totalTasks = TASKS.length;
+      const globalProgress = totalTasks ? Math.round((completedCount / totalTasks) * 100) : 0;
+
+      return {
+        completedCount,
+        inProgressCount,
+        pendingCount,
+        overdueCount,
+        onTrackCount,
+        upcomingCount,
+        blocked,
+        criticalTasks,
+        riskMessage: riskMessages.length ? riskMessages.slice(0, 4).join(" · ") : "Nenhum risco operacional crítico identificado.",
+        globalProgress
+      };
+    }
+
+    function updateTimeline() {
+      const input = document.getElementById("assemblyDate");
+      if (!input) return;
+
+      const value = input.value;
+      const startLabel = document.getElementById("windowStartLabel");
+      const daysLabel = document.getElementById("daysRemainingLabel");
+      const timelineStatus = document.getElementById("timelineStatus");
+      const overviewAssemblyDate = document.getElementById("overviewAssemblyDate");
+
+      if (!value) {
+        if (overviewAssemblyDate) overviewAssemblyDate.textContent = "—";
+        if (startLabel) startLabel.textContent = "—";
+        if (daysLabel) daysLabel.textContent = "—";
+        if (timelineStatus) timelineStatus.textContent = "Defina a data da assembleia para activar a timeline.";
+
+        document.querySelectorAll(".phase-date-range").forEach(el => {
+          el.textContent = "Datas calculadas automaticamente após definir a data da assembleia.";
+        });
+
+        document.querySelectorAll(".task-date-hint").forEach(el => { el.textContent = ""; });
+        document.querySelectorAll(".task-card").forEach(taskEl => {
+          taskEl.classList.remove("ring-2", "ring-red-300", "ring-amber-300", "ring-blue-300");
+        });
+        return;
+      }
+
+      const assemblyDate = new Date(value + "T00:00:00");
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const start90 = shiftDate(assemblyDate, -90);
+      const diffDays = Math.ceil((assemblyDate - today) / (1000 * 60 * 60 * 24));
+
+      if (overviewAssemblyDate) overviewAssemblyDate.textContent = formatDatePT(assemblyDate);
+      if (startLabel) startLabel.textContent = formatDatePT(start90);
+      if (daysLabel) daysLabel.textContent = diffDays >= 0 ? `${diffDays} dias` : "Assembleia já realizada";
+
+      document.querySelectorAll(".phase-card").forEach(phaseEl => {
+        const phaseId = phaseEl.dataset.phase;
+        const offset = PHASE_DATE_CONFIG[phaseId];
+        const label = phaseEl.querySelector(".phase-date-range");
+        if (!offset || !label) return;
+
+        const start = shiftDate(assemblyDate, offset.startOffset);
+        const end = shiftDate(assemblyDate, offset.endOffset);
+
+        label.textContent = offset.startOffset === offset.endOffset
+          ? `Data exacta: ${formatDatePT(start)}`
+          : `Janela recomendada: ${formatDatePT(start)} a ${formatDatePT(end)}`;
+      });
+
+      document.querySelectorAll(".task-card").forEach(taskEl => {
+        const id = taskEl.dataset.taskId;
+        const task = getTask(id);
+        const hint = taskEl.querySelector(".task-date-hint");
+        const saved = getTaskState(id);
+        const status = saved.status || "pendente";
+
+        if (!task || !hint) return;
+
+        const start = shiftDate(assemblyDate, task.startOffset);
+        const end = shiftDate(assemblyDate, task.endOffset);
+
+        taskEl.classList.remove("ring-2", "ring-red-300", "ring-amber-300", "ring-blue-300");
+
+        let timelineState = "";
+        if (status === "concluido") {
+          timelineState = "✔ Concluída";
+        } else if (today < start) {
+          const daysToStart = Math.ceil((start - today) / (1000 * 60 * 60 * 24));
+          timelineState = `⏳ Próxima: começa em ${daysToStart} dia(s)`;
+          taskEl.classList.add("ring-2", "ring-blue-300");
+        } else if (today >= start && today <= end) {
+          const daysToEnd = Math.ceil((end - today) / (1000 * 60 * 60 * 24));
+          timelineState = `🟡 Dentro do prazo: restam ${daysToEnd} dia(s)`;
+          taskEl.classList.add("ring-2", "ring-amber-300");
+        } else {
+          const overdueDays = Math.ceil((today - end) / (1000 * 60 * 60 * 24));
+          timelineState = `❌ Atrasada há ${overdueDays} dia(s)`;
+          taskEl.classList.add("ring-2", "ring-red-300");
+        }
+
+        hint.textContent = task.startOffset === task.endOffset
+          ? `${task.label}: ${formatDatePT(start)} · ${timelineState}`
+          : `${task.label}: ${formatDatePT(start)} a ${formatDatePT(end)} · ${timelineState}`;
+      });
+    }
+
+    function updateTaskStyles() {
+      document.querySelectorAll(".task-card").forEach(taskEl => {
+        const id = taskEl.dataset.taskId;
+        const task = getTask(id);
+        const saved = getTaskState(id);
+        const status = saved.status || "pendente";
+
+        taskEl.classList.remove(
+          "border-slate-300", "border-amber-300", "border-green-300",
+          "bg-white", "bg-amber-50", "bg-green-50",
+          "border-red-400", "bg-red-50"
+        );
+
+        if (status === "concluido") {
+          taskEl.classList.add("border-green-300", "bg-green-50");
+        } else if (status === "emcurso") {
+          taskEl.classList.add("border-amber-300", "bg-amber-50");
+        } else if (task && task.priority === "alta") {
+          taskEl.classList.add("border-red-200", "bg-rose-50");
+        } else {
+          taskEl.classList.add("border-slate-300", "bg-white");
+        }
+
+        const depHint = taskEl.querySelector(".dependency-hint");
+        const deps = DEPENDENCIES[id] || [];
+        if (!depHint) return;
+
+        if (!deps.length) {
+          depHint.textContent = "";
+          return;
+        }
+
+        const pending = deps.filter(depId => getTaskState(depId).status !== "concluido");
+        depHint.textContent = pending.length
+          ? `Dependências em falta: ${pending.join(", ")}`
+          : `Dependências satisfeitas: ${deps.join(", ")}`;
+      });
+    }
+
+    function updateProgress() {
+      const metrics = computeMetrics();
+
+      document.querySelectorAll(".phase-card").forEach(phaseEl => {
+        const cards = [...phaseEl.querySelectorAll(".task-card")];
+        const total = cards.length;
+        const done = cards.filter(card => getTaskState(card.dataset.taskId).status === "concluido").length;
+        const percent = total ? Math.round((done / total) * 100) : 0;
+
+        const bar = phaseEl.querySelector(".progress-bar");
+        const label = phaseEl.querySelector(".progress-label");
+        if (bar) bar.style.width = `${percent}%`;
+        if (label) label.textContent = `${percent}% concluído`;
+      });
+
+      const timelineStatus = document.getElementById("timelineStatus");
+      const riskBanner = document.getElementById("riskBanner");
+      const riskBannerText = document.getElementById("riskBannerText");
+
+      if (timelineStatus) {
+        if (metrics.blocked) {
+          timelineStatus.textContent = `⚠️ Atrasadas: ${metrics.overdueCount} · Dentro do prazo: ${metrics.onTrackCount} · Próximas: ${metrics.upcomingCount}`;
+          timelineStatus.classList.add("text-rose-700", "font-bold");
+        } else {
+          timelineStatus.textContent = `✅ Dentro do prazo: ${metrics.onTrackCount} · Próximas: ${metrics.upcomingCount} · Atrasadas: ${metrics.overdueCount}`;
+          timelineStatus.classList.remove("text-rose-700", "font-bold");
+        }
+      }
+
+      if (riskBanner && riskBannerText) {
+        if (metrics.blocked) {
+          riskBanner.classList.remove("hidden");
+          riskBannerText.textContent = metrics.riskMessage;
+        } else {
+          riskBanner.classList.add("hidden");
+        }
+      }
+    }
+
+    function bindTabs() {
+      document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.onclick = () => {
+          state.__activeView = btn.dataset.view;
+          saveState();
+          renderCurrentView();
+        };
+      });
+    }
+
+    function bindReset() {
+      document.getElementById("resetDataBtn").onclick = () => {
+        const ok = confirm("Tem a certeza que quer limpar todos os estados, datas e observações?");
+        if (!ok) return;
+        localStorage.removeItem(STORAGE_KEY);
+        location.reload();
+      };
+    }
+
+    function renderCurrentView() {
+      const view = state.__activeView || "overview";
+      setActiveTab(view);
+
+      const overviewPanel = document.getElementById("overviewPanel");
+      const taskBoard = document.getElementById("taskBoard");
+
+      if (view === "overview") {
+        taskBoard.classList.add("hidden");
+        overviewPanel.classList.remove("hidden");
+        renderOverview();
+      } else {
+        overviewPanel.classList.add("hidden");
+        taskBoard.classList.remove("hidden");
+        renderTaskBoard(view);
+      }
+    }
+
+    function boot() {
+      bindTabs();
+      bindReset();
+      if (!state.__activeView) state.__activeView = "overview";
+      saveState();
+      renderCurrentView();
+    }
+
+    boot();
+  </script>
 </body>
 </html>
