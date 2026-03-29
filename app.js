@@ -44,10 +44,24 @@
 
   function renderShell() {
     document.getElementById("app").innerHTML = UI.shell();
+    document.getElementById("overviewPanel").innerHTML = UI.overviewCards();
   }
 
   function renderBoard(view) {
     const board = document.getElementById("taskBoard");
+    const overviewPanel = document.getElementById("overviewPanel");
+
+    if (view === "overview") {
+      board.innerHTML = "";
+      overviewPanel.classList.remove("hidden");
+      updateTimeline();
+      updateTaskStyles();
+      updateProgress();
+      return;
+    }
+
+    overviewPanel.classList.add("hidden");
+
     const grouped = {};
 
     APP_DATA.tasks.forEach(task => {
@@ -134,8 +148,10 @@
     const startLabel = document.getElementById("windowStartLabel");
     const daysLabel = document.getElementById("daysRemainingLabel");
     const timelineStatus = document.getElementById("timelineStatus");
+    const overviewAssemblyDate = document.getElementById("overviewAssemblyDate");
 
     if (!value) {
+      if (overviewAssemblyDate) overviewAssemblyDate.textContent = "—";
       startLabel.textContent = "—";
       daysLabel.textContent = "—";
       timelineStatus.textContent = "Defina a data da assembleia para activar a timeline.";
@@ -162,15 +178,15 @@
     const start90 = shiftDate(assemblyDate, -90);
     const diffDays = Math.ceil((assemblyDate - today) / (1000 * 60 * 60 * 24));
 
+    if (overviewAssemblyDate) overviewAssemblyDate.textContent = formatDatePT(assemblyDate);
     startLabel.textContent = formatDatePT(start90);
     daysLabel.textContent = diffDays >= 0 ? `${diffDays} dias` : "Assembleia já realizada";
 
     document.querySelectorAll(".phase-card").forEach(phaseEl => {
       const phaseId = phaseEl.dataset.phase;
-      const cfg = APP_DATA.phases[phaseId];
       const offset = APP_DATA.phaseDateConfig[phaseId];
       const label = phaseEl.querySelector(".phase-date-range");
-      if (!cfg || !offset || !label) return;
+      if (!offset || !label) return;
 
       const start = shiftDate(assemblyDate, offset.startOffset);
       const end = shiftDate(assemblyDate, offset.endOffset);
@@ -264,6 +280,9 @@
     let overdueCount = 0;
     let upcomingCount = 0;
     let onTrackCount = 0;
+    let completedCount = 0;
+    let inProgressCount = 0;
+    let pendingCount = 0;
     const riskMessages = [];
 
     const value = document.getElementById("assemblyDate").value;
@@ -275,6 +294,56 @@
     today.setHours(0, 0, 0, 0);
 
     const assemblyDate = value ? new Date(value + "T00:00:00") : null;
+
+    APP_DATA.tasks.forEach(task => {
+      const saved = getTaskState(task.id);
+      const status = saved.status || "pendente";
+
+      if (status === "concluido") completedCount++;
+      else if (status === "emcurso") inProgressCount++;
+      else pendingCount++;
+
+      if (!assemblyDate || status === "concluido") return;
+
+      const start = shiftDate(assemblyDate, task.startOffset);
+      const end = shiftDate(assemblyDate, task.endOffset);
+
+      if (today < start) {
+        upcomingCount++;
+      } else if (today >= start && today <= end) {
+        onTrackCount++;
+      } else {
+        overdueCount++;
+        if (task.priority === "alta") {
+          blocked = true;
+          riskMessages.push(`Tarefa crítica ${task.id} atrasada`);
+        }
+      }
+
+      const deps = APP_DATA.dependencies[task.id] || [];
+      if ((status === "emcurso" || status === "concluido") && deps.length) {
+        const invalid = deps.filter(depId => getTaskState(depId).status !== "concluido");
+        if (invalid.length) {
+          blocked = true;
+          riskMessages.push(`Tarefa ${task.id} depende de ${invalid.join(", ")}`);
+        }
+      }
+    });
+
+    const totalTasks = APP_DATA.tasks.length;
+    const globalProgress = totalTasks ? Math.round((completedCount / totalTasks) * 100) : 0;
+
+    const kpiProgressGlobal = document.getElementById("kpiProgressGlobal");
+    const kpiConcluidas = document.getElementById("kpiConcluidas");
+    const kpiEmCurso = document.getElementById("kpiEmCurso");
+    const kpiPendentes = document.getElementById("kpiPendentes");
+    const kpiAtrasadas = document.getElementById("kpiAtrasadas");
+
+    if (kpiProgressGlobal) kpiProgressGlobal.textContent = `${globalProgress}%`;
+    if (kpiConcluidas) kpiConcluidas.textContent = completedCount;
+    if (kpiEmCurso) kpiEmCurso.textContent = inProgressCount;
+    if (kpiPendentes) kpiPendentes.textContent = pendingCount;
+    if (kpiAtrasadas) kpiAtrasadas.textContent = overdueCount;
 
     document.querySelectorAll(".phase-card").forEach(phaseEl => {
       const cards = [...phaseEl.querySelectorAll(".task-card")];
@@ -290,39 +359,6 @@
 
       if (bar) bar.style.width = `${percent}%`;
       if (label) label.textContent = `${percent}% concluído`;
-
-      cards.forEach(card => {
-        const id = card.dataset.taskId;
-        const task = getTaskById(id);
-        const saved = getTaskState(id);
-        const status = saved.status || "pendente";
-
-        if (!assemblyDate || !task || status === "concluido") return;
-
-        const start = shiftDate(assemblyDate, task.startOffset);
-        const end = shiftDate(assemblyDate, task.endOffset);
-
-        if (today < start) {
-          upcomingCount++;
-        } else if (today >= start && today <= end) {
-          onTrackCount++;
-        } else {
-          overdueCount++;
-          if (task.priority === "alta") {
-            blocked = true;
-            riskMessages.push(`Tarefa crítica ${id} atrasada`);
-          }
-        }
-
-        const deps = APP_DATA.dependencies[id] || [];
-        if ((status === "emcurso" || status === "concluido") && deps.length) {
-          const invalid = deps.filter(depId => getTaskState(depId).status !== "concluido");
-          if (invalid.length) {
-            blocked = true;
-            riskMessages.push(`Tarefa ${id} depende de ${invalid.join(", ")}`);
-          }
-        }
-      });
     });
 
     if (blocked) {
@@ -356,7 +392,7 @@
     input.onchange = () => {
       state.__assemblyDate = input.value;
       saveState();
-      renderBoard(state.__activeView || "all");
+      renderBoard(state.__activeView || "overview");
     };
   }
 
@@ -376,7 +412,7 @@
     bindAssemblyDate();
     bindReset();
 
-    const view = state.__activeView || "all";
+    const view = state.__activeView || "overview";
     setActiveTab(view);
     renderBoard(view);
   }
