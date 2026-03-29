@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Assembleia Distrital · Distrito da Matola</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#0b0e17;--surface:#111520;--surface2:#181d2e;
+      --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+      --text:#e8eaf0;--muted:#7a8099;--dim:#4a5068;
+      --accent:#4f7cff;--accent-g:rgba(79,124,255,0.18);
+      --amber:#f5a623;--amber-g:rgba(245,166,35,0.15);
+      --rose:#ff5572;--rose-g:rgba(255,85,114,0.15);
+      --emerald:#00d68f;--emerald-g:rgba(0,214,143,0.15);
+      --slate-c:#8896b3;
+      --success:#00d68f;--warning:#f5a623;--danger:#ff5572;
+      --r:14px;--r-sm:10px;--r-xs:7px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;line-height:1.5}
+    ::-webkit-scrollbar{width:4px;height:4px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+    .wrap{max-width:1100px;margin:0 auto;padding:14px}
+    @media(min-width:768px){.wrap{padding:24px}}
+
+    /* Header */
+    .hdr{background:linear-gradient(135deg,#0f1629 0%,#1a0f29 50%,#0f1629 100%);border:1px solid var(--border2);border-radius:var(--r);padding:22px;margin-bottom:14px;position:relative;overflow:hidden}
+    .hdr::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(79,124,255,.12) 0%,transparent 70%);pointer-events:none}
+    .hdr-eye{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;font-family:'JetBrains Mono',monospace}
+    .hdr-title{font-size:clamp(18px,5vw,30px);font-weight:800;color:#fff;line-height:1.15;margin-bottom:4px}
+    .hdr-sub{font-size:12px;color:var(--muted);margin-bottom:14px}
+    .hdr-chips{display:flex;flex-wrap:wrap;gap:6px}
+    .chip{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:20px;padding:4px 11px;font-size:10px;font-weight:600;color:var(--muted);font-family:'JetBrains Mono',monospace}
+
+    /* Date card */
+    .date-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:14px}
+    .date-row{display:flex;flex-direction:column;gap:10px}
+    @media(min-width:600px){.date-row{flex-direction:row;align-items:flex-end}}
+    .date-field{flex:1}
+    .field-lbl{display:block;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;font-family:'JetBrains Mono',monospace}
+    .date-in{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r-sm);padding:9px 13px;font-size:13px;font-family:'JetBrains Mono',monospace;color:var(--text);outline:none;transition:border-color .2s;color-scheme:dark}
+    .date-in:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-g)}
+    .date-info{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r-sm);padding:9px 13px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);min-height:38px;display:flex;align-items:center}
+    .tl-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:9px 13px;font-size:11px;color:var(--muted);margin-top:10px;min-height:36px;font-family:'JetBrains Mono',monospace}
+
+    /* KPIs */
+    .kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-bottom:14px}
+    @media(min-width:480px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
+    @media(min-width:768px){.kpi-grid{grid-template-columns:repeat(5,1fr)}}
+    .kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:13px;position:relative;overflow:hidden}
+    .kpi-lbl{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);font-family:'JetBrains Mono',monospace;margin-bottom:7px}
+    .kpi-val{font-size:24px;font-weight:800;line-height:1;color:#fff}
+    .kpi-bar{position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--border)}
+    .kpi.c-a .kpi-val{color:var(--accent)}.kpi.c-a .kpi-bar{background:var(--accent)}
+    .kpi.c-s .kpi-val{color:var(--success)}.kpi.c-s .kpi-bar{background:var(--success)}
+    .kpi.c-w .kpi-val{color:var(--warning)}.kpi.c-w .kpi-bar{background:var(--warning)}
+    .kpi.c-d .kpi-val{color:var(--danger)}.kpi.c-d .kpi-bar{background:var(--danger)}
+
+    /* Action row */
+    .action-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+    .tabs-wrap{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+    .tabs-wrap::-webkit-scrollbar{display:none}
+    .tabs-inner{display:flex;gap:4px;min-width:max-content}
+    .tab-btn{padding:7px 14px;border-radius:var(--r-xs);font-size:12px;font-weight:600;font-family:'Sora',sans-serif;color:var(--muted);background:transparent;border:none;cursor:pointer;transition:all .18s;white-space:nowrap}
+    .tab-btn:hover{color:var(--text);background:rgba(255,255,255,.05)}
+    .tab-btn.active{background:var(--accent);color:#fff;box-shadow:0 2px 10px var(--accent-g)}
+    .reset-btn{background:rgba(255,85,114,.08);border:1px solid rgba(255,85,114,.2);border-radius:var(--r-xs);padding:8px 14px;font-size:12px;font-weight:600;color:var(--danger);cursor:pointer;font-family:'Sora',sans-serif;transition:all .18s;white-space:nowrap}
+    .reset-btn:hover{background:rgba(255,85,114,.15)}
+
+    /* Risk */
+    .risk{display:none;background:rgba(255,85,114,.08);border:1px solid rgba(255,85,114,.3);border-radius:var(--r-sm);padding:11px 14px;margin-bottom:14px;gap:10px;align-items:flex-start}
+    .risk.on{display:flex}
+    .risk-ico{font-size:15px;flex-shrink:0;margin-top:1px}
+    .risk-ttl{font-size:12px;font-weight:700;color:var(--danger);margin-bottom:2px}
+    .risk-txt{font-size:11px;color:rgba(255,85,114,.7);font-family:'JetBrains Mono',monospace}
+
+    /* Phase */
+    @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .phase{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:11px;overflow:hidden;animation:fadeUp .22s ease both}
+    .phase:nth-child(1){animation-delay:0ms}.phase:nth-child(2){animation-delay:50ms}
+    .phase:nth-child(3){animation-delay:100ms}.phase:nth-child(4){animation-delay:150ms}
+    .phase:nth-child(5){animation-delay:200ms}
+    .phase-hdr{width:100%;text-align:left;padding:17px 18px;cursor:pointer;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;background:none;border:none;color:inherit}
+    .phase-left{flex:1;min-width:0}
+    .phase-top{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:7px}
+    .phase-ico{font-size:15px;line-height:1}
+    .phase-code{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:3px 9px;border-radius:20px;font-family:'JetBrains Mono',monospace}
+    .phase-sub{font-size:10px;color:var(--muted)}
+    .phase-title{font-size:clamp(14px,3vw,18px);font-weight:700;color:#fff;line-height:1.2;margin-bottom:3px}
+    .phase-desc{font-size:11px;color:var(--muted);line-height:1.4;margin-bottom:8px}
+    .phase-range{font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:500;color:var(--muted);margin-bottom:8px}
+    .phase-prog{display:flex;align-items:center;gap:8px}
+    .phase-track{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.07);overflow:hidden}
+    .phase-fill{height:100%;border-radius:2px;transition:width .4s ease;width:0%}
+    .phase-pct{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;flex-shrink:0;min-width:36px;text-align:right}
+    .tog-ico{font-size:20px;font-weight:300;color:var(--muted);flex-shrink:0;margin-top:2px;line-height:1}
+    .phase-body{padding:0 14px 14px}
+    .phase-body.closed{display:none}
+    .tasks-grid{display:grid;gap:9px;grid-template-columns:1fr}
+    @media(min-width:768px){.tasks-grid{grid-template-columns:1fr 1fr}}
+
+    /* Phase colors */
+    .ph-blue .phase-code{background:rgba(79,124,255,.15);color:var(--accent)}
+    .ph-blue .phase-fill{background:var(--accent)}.ph-blue .phase-pct{color:var(--accent)}
+    .ph-amber .phase-code{background:var(--amber-g);color:var(--amber)}
+    .ph-amber .phase-fill{background:var(--amber)}.ph-amber .phase-pct{color:var(--amber)}
+    .ph-rose .phase-code{background:var(--rose-g);color:var(--rose)}
+    .ph-rose .phase-fill{background:var(--rose)}.ph-rose .phase-pct{color:var(--rose)}
+    .ph-emerald .phase-code{background:var(--emerald-g);color:var(--emerald)}
+    .ph-emerald .phase-fill{background:var(--emerald)}.ph-emerald .phase-pct{color:var(--emerald)}
+    .ph-slate .phase-code{background:rgba(136,150,179,.15);color:var(--slate-c)}
+    .ph-slate .phase-fill{background:var(--slate-c)}.ph-slate .phase-pct{color:var(--slate-c)}
+
+    /* Task */
+    .task{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:13px;transition:border-color .18s,box-shadow .18s}
+    .task.done{border-color:rgba(0,214,143,.25);background:rgba(0,214,143,.04)}
+    .task.inp{border-color:rgba(245,166,35,.25);background:rgba(245,166,35,.04)}
+    .task.pri-alta:not(.done):not(.inp){border-color:rgba(255,85,114,.25);background:rgba(255,85,114,.04)}
+    .task.overdue:not(.done){box-shadow:0 0 0 1.5px rgba(255,85,114,.4)}
+    .task.ontrack:not(.done){box-shadow:0 0 0 1.5px rgba(245,166,35,.4)}
+    .task.upcoming:not(.done){box-shadow:0 0 0 1.5px rgba(79,124,255,.35)}
+    .task-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:7px;margin-bottom:9px}
+    .task-id{font-size:10px;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--dim);margin-bottom:2px}
+    .task-ttl{font-size:13px;font-weight:600;color:var(--text);line-height:1.3}
+    .task-owner{font-size:11px;color:var(--muted);margin-top:2px}
+    .pri-badge{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:20px;flex-shrink:0;font-family:'JetBrains Mono',monospace}
+    .pri-badge.alta{background:rgba(255,85,114,.15);color:var(--danger);border:1px solid rgba(255,85,114,.25)}
+    .pri-badge.media{background:rgba(245,166,35,.1);color:var(--amber);border:1px solid rgba(245,166,35,.2)}
+    .pri-badge.baixa{background:rgba(255,255,255,.04);color:var(--dim);border:1px solid var(--border)}
+    .task-hint{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-bottom:3px;line-height:1.4}
+    .task-dep{font-size:11px;color:var(--dim);margin-bottom:9px;line-height:1.4}
+    .task-ctrls{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px}
+    @media(max-width:480px){.task-ctrls{grid-template-columns:1fr}}
+    .task-sel,.task-di{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-xs);padding:8px 10px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--text);outline:none;transition:border-color .18s;color-scheme:dark;cursor:pointer}
+    @media(max-width:640px){.task-sel,.task-di{font-size:16px}}
+    .task-sel:focus,.task-di:focus{border-color:var(--accent)}
+    .task-notes{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xs);padding:8px 10px;font-size:12px;font-family:'Sora',sans-serif;color:var(--text);outline:none;resize:vertical;min-height:56px;transition:border-color .18s}
+    @media(max-width:640px){.task-notes{font-size:16px}}
+    .task-notes:focus{border-color:var(--accent)}
+    .task-notes::placeholder{color:var(--dim)}
+  </style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const D={
+  phases:{
+    "1":{code:"FASE 1",title:"Preparação na Igreja Local",sub:"Até 90 dias antes",desc:"Encerramento do ano estatístico, contas, comissão local e relatório anual do pastor.",color:"blue",icon:"🏛️"},
+    "2":{code:"FASE 2",title:"Reunião Anual da Igreja Local",sub:"Dentro de 90 dias antes",desc:"Convocação, relatórios e eleição de oficiais e delegados.",color:"amber",icon:"📋"},
+    "3":{code:"FASE 3",title:"Preparação Ministerial Individual",sub:"Pastores, ordenados e licenciados",desc:"Relatórios ministeriais, ordenação e renovação de licenças.",color:"rose",icon:"✝️"},
+    "4":{code:"FASE 4",title:"Organização Distrital Pré-Assembleia",sub:"SD + Junta Consultiva",desc:"Logística, comissões, documentação, credenciação e preparação final.",color:"emerald",icon:"⚙️"},
+    "5":{code:"FASE 5",title:"O Dia da Assembleia Distrital",sub:"Dia da Assembleia",desc:"Abertura, registo, relatórios, eleições e encerramento.",color:"slate",icon:"🎯"}
+  },
+  tasks:[
+    {id:"1.1",ph:"1",title:"Encerramento do Ano Estatístico",owner:"Pastor + Secretário",g:["igreja","ministros"],s:-90,e:-85,pri:"media"},
+    {id:"1.2",ph:"1",title:"Nomeação da Comissão de Recomendações",owner:"Pastor",g:["igreja","ministros"],s:-84,e:-80,pri:"media"},
+    {id:"1.3",ph:"1",title:"Auditoria / Revisão das Contas",owner:"Junta da Igreja / Comissão de Auditoria",g:["igreja","juntas"],s:-79,e:-70,pri:"media"},
+    {id:"1.4",ph:"1",title:"Preparação do Relatório Anual do Pastor (RAP)",owner:"Pastor + Secretário + Tesoureiro",g:["igreja","ministros"],s:-69,e:-61,pri:"media"},
+    {id:"2.1",ph:"2",title:"Convocação e Anúncio da Reunião Anual",owner:"Pastor",g:["igreja","ministros"],s:-60,e:-50,pri:"media"},
+    {id:"2.2",ph:"2",title:"Apresentação de Relatórios na Reunião Anual",owner:"Pastor + Líderes Locais",g:["igreja","ministros"],s:-49,e:-40,pri:"media"},
+    {id:"2.3",ph:"2",title:"Eleição de Oficiais, Juntas, Mordomos e Ecónomos",owner:"Membros da Igreja",g:["igreja"],s:-39,e:-30,pri:"media"},
+    {id:"2.4",ph:"2",title:"Eleição de Delegados à Assembleia Distrital",owner:"Membros da Igreja",g:["igreja"],s:-39,e:-30,pri:"media"},
+    {id:"2.5",ph:"2",title:"Certificado de Eleição e Formulários Distritais",owner:"Secretário da Igreja",g:["igreja"],s:-29,e:-20,pri:"media"},
+    {id:"3.1",ph:"3",title:"Relatório Anual dos Ministros Ordenados e Licenciados",owner:"Cada Ministro",g:["ministros"],s:-75,e:-35,pri:"media"},
+    {id:"3.2",ph:"3",title:"Candidatos à Ordenação e Renovação de Licenças",owner:"Candidatos + Junta de Estudos",g:["ministros","juntas"],s:-60,e:-20,pri:"media"},
+    {id:"4.1",ph:"4",title:"Fixação da Data, Local e Logística",owner:"Superintendente + Junta Consultiva",g:["sd","juntas"],s:-60,e:-52,pri:"alta"},
+    {id:"4.2",ph:"4",title:"Nomeação da Comissão de Logística",owner:"Superintendente + Junta Consultiva",g:["sd","juntas"],s:-51,e:-46,pri:"media"},
+    {id:"4.3",ph:"4",title:"Criação das Comissões de Contagem de Votos",owner:"Superintendente + Junta Consultiva",g:["sd","juntas"],s:-45,e:-40,pri:"alta"},
+    {id:"4.4",ph:"4",title:"Revisão da Documentação",owner:"Secretário Distrital",g:["sd"],s:-39,e:-33,pri:"alta"},
+    {id:"4.5",ph:"4",title:"Comissão de Credenciais",owner:"Junta + Secretaria Distrital",g:["juntas"],s:-32,e:-26,pri:"alta"},
+    {id:"4.6",ph:"4",title:"Comissão de Recepção e Acolhimento",owner:"Equipa de apoio distrital",g:["juntas"],s:-25,e:-20,pri:"baixa"},
+    {id:"4.7",ph:"4",title:"Comissão de Protocolo e Ordem",owner:"Equipa de protocolo",g:["juntas"],s:-19,e:-14,pri:"media"},
+    {id:"4.8",ph:"4",title:"Comissão de Som e Equipamentos",owner:"Equipa técnica",g:["juntas"],s:-13,e:-9,pri:"media"},
+    {id:"4.9",ph:"4",title:"Comissão de Alimentação",owner:"Equipa designada",g:["juntas"],s:-8,e:-5,pri:"baixa"},
+    {id:"4.10",ph:"4",title:"Comissão de Segurança",owner:"Equipa de segurança",g:["juntas"],s:-4,e:-1,pri:"baixa"},
+    {id:"5.1",ph:"5",title:"Abertura e Culto de Inauguração",owner:"Oficial que preside",g:["sd"],s:0,e:0,pri:"media"},
+    {id:"5.2",ph:"5",title:"Registo de Delegados e Credenciais",owner:"Secretário Distrital",g:["sd"],s:0,e:0,pri:"media"},
+    {id:"5.3",ph:"5",title:"Apresentação de Relatórios",owner:"Mesa + Relatores",g:["sd","ministros"],s:0,e:0,pri:"media"},
+    {id:"5.4",ph:"5",title:"Eleições",owner:"Assembleia + Comissão de Contagem",g:["juntas"],s:0,e:0,pri:"media"},
+    {id:"5.5",ph:"5",title:"Encerramento, Jornal e Arquivamento",owner:"Secretário Distrital + Mesa",g:["sd"],s:0,e:1,pri:"media"}
+  ],
+  deps:{"2.5":["2.3","2.4"],"4.4":["2.5","3.1"],"4.5":["2.5","3.2"],"5.2":["4.5"],"5.3":["4.4"],"5.4":["4.3","5.2"],"5.5":["5.3","5.4"]}
+};
+
+const Store=(()=>{
+  const K="assembleia_v4";
+  return{
+    load:()=>{try{return JSON.parse(localStorage.getItem(K))||{}}catch(e){return{}}},
+    save:d=>localStorage.setItem(K,JSON.stringify(d)),
+    clear:()=>localStorage.removeItem(K)
+  };
+})();
+
+(function(){
+  const st=Store.load();
+  const fmt=d=>d.toLocaleDateString("pt-PT",{day:"2-digit",month:"long",year:"numeric"});
+  const shift=(b,n)=>{const d=new Date(b);d.setDate(d.getDate()+n);return d};
+  const byId=id=>D.tasks.find(t=>t.id===id);
+  const ts=id=>st[id]||{status:"pendente",date:"",notes:""};
+  const save=()=>Store.save(st);
+  const $=id=>document.getElementById(id);
+  const qa=sel=>[...document.querySelectorAll(sel)];
+
+  function shell(){
+    $("app").innerHTML=`<div class="wrap">
+<header class="hdr">
+  <p class="hdr-eye">Manual 2023 · Igreja do Nazareno</p>
+  <h1 class="hdr-title">Guia da Assembleia Distrital</h1>
+  <p class="hdr-sub">Distrito da Matola · Da Igreja Local até ao Dia da Assembleia</p>
+  <div class="hdr-chips"><span class="chip">5 Fases</span><span class="chip">26 Tarefas</span><span class="chip">28ª Assembleia</span></div>
+</header>
+
+<div class="date-card">
+  <div class="date-row">
+    <div class="date-field"><label class="field-lbl" for="asmDate">Data da Assembleia</label><input id="asmDate" type="date" class="date-in"/></div>
+    <div class="date-field"><label class="field-lbl">Início dos 90 dias</label><div id="win90" class="date-info">—</div></div>
+    <div class="date-field"><label class="field-lbl">Dias restantes</label><div id="daysLeft" class="date-info">—</div></div>
+  </div>
+  <div id="tlBox" class="tl-box">Defina a data da assembleia para activar a timeline.</div>
+</div>
+
+<div class="kpi-grid">
+  <div class="kpi c-a"><div class="kpi-lbl">Progresso</div><div id="kPct" class="kpi-val">0%</div><div class="kpi-bar"></div></div>
+  <div class="kpi c-s"><div class="kpi-lbl">Concluídas</div><div id="kDone" class="kpi-val">0</div><div class="kpi-bar"></div></div>
+  <div class="kpi c-w"><div class="kpi-lbl">Em curso</div><div id="kInP" class="kpi-val">0</div><div class="kpi-bar"></div></div>
+  <div class="kpi"><div class="kpi-lbl">Pendentes</div><div id="kPend" class="kpi-val">0</div><div class="kpi-bar"></div></div>
+  <div class="kpi c-d"><div class="kpi-lbl">Atrasadas</div><div id="kLate" class="kpi-val">0</div><div class="kpi-bar"></div></div>
+</div>
+
+<div class="action-row">
+  <div class="tabs-wrap"><div class="tabs-inner" id="tabs">
+    <button class="tab-btn active" data-v="all">Ver Tudo</button>
+    <button class="tab-btn" data-v="igreja">Igreja Local</button>
+    <button class="tab-btn" data-v="ministros">Pastores / Ministros</button>
+    <button class="tab-btn" data-v="sd">Superintendente</button>
+    <button class="tab-btn" data-v="juntas">Juntas</button>
+    <button class="tab-btn" data-v="day">Modo Dia</button>
+  </div></div>
+  <button id="resetBtn" class="reset-btn">Limpar Dados</button>
+</div>
+
+<div id="risk" class="risk"><span class="risk-ico">⚠️</span><div><div class="risk-ttl">Risco operacional detectado</div><div id="riskTxt" class="risk-txt">—</div></div></div>
+<div id="board"></div>
+</div>`;
+  }
+
+  function board(view){
+    const grouped={};
+    D.tasks.forEach(t=>{
+      const vis=view==="all"||(view==="day"&&t.ph==="5")||(view!=="all"&&view!=="day"&&t.g.includes(view));
+      if(!vis)return;
+      (grouped[t.ph]=grouped[t.ph]||[]).push(t);
+    });
+    let html="";
+    Object.keys(D.phases).forEach(pid=>{
+      if(!grouped[pid]?.length)return;
+      const ph=D.phases[pid];
+      const th=grouped[pid].map(t=>taskCard(t)).join("");
+      html+=`<section class="phase ph-${ph.color}" data-pid="${pid}">
+<button class="phase-hdr phase-tog">
+  <div class="phase-left">
+    <div class="phase-top"><span class="phase-ico">${ph.icon}</span><span class="phase-code">${ph.code}</span><span class="phase-sub">${ph.sub}</span></div>
+    <h2 class="phase-title">${ph.title}</h2>
+    <p class="phase-desc">${ph.desc}</p>
+    <p class="phase-range">—</p>
+    <div class="phase-prog"><div class="phase-track"><div class="phase-fill" style="width:0%"></div></div><span class="phase-pct">0%</span></div>
+  </div>
+  <span class="tog-ico">−</span>
+</button>
+<div class="phase-body"><div class="tasks-grid">${th}</div></div>
+</section>`;
+    });
+    $("board").innerHTML=html;
+    bindPhase(); bindInputs(); updateTimeline(); updateStyles(); updateProgress();
+  }
+
+  function taskCard(t){
+    const s=ts(t.id);
+    const pm={alta:"Alta",media:"Média",baixa:"Baixa"};
+    return `<article class="task pri-${t.pri}" data-tid="${t.id}">
+<div class="task-hdr">
+  <div><div class="task-id">${t.id}</div><div class="task-ttl">${t.title}</div><div class="task-owner">${t.owner}</div></div>
+  <span class="pri-badge ${t.pri}">${pm[t.pri]}</span>
+</div>
+<div class="task-hint"></div>
+<div class="task-dep"></div>
+<div class="task-ctrls">
+  <select class="task-sel s-sel">
+    <option value="pendente"${s.status==="pendente"?" selected":""}>⬜ Pendente</option>
+    <option value="emcurso"${s.status==="emcurso"?" selected":""}>🟡 Em curso</option>
+    <option value="concluido"${s.status==="concluido"?" selected":""}>✅ Concluído</option>
+  </select>
+  <input class="task-di d-sel" type="date" value="${s.date||""}"/>
+</div>
+<textarea class="task-notes n-inp" rows="2" placeholder="Observações...">${s.notes||""}</textarea>
+</article>`;
+  }
+
+  function bindPhase(){
+    qa(".phase-tog").forEach(btn=>{
+      btn.onclick=()=>{
+        const body=btn.closest(".phase").querySelector(".phase-body");
+        const ico=btn.closest(".phase").querySelector(".tog-ico");
+        body.classList.toggle("closed");
+        ico.textContent=body.classList.contains("closed")?"+":"−";
+      };
+    });
+  }
+
+  function bindInputs(){
+    qa(".s-sel").forEach(el=>el.onchange=e=>{
+      const tid=e.target.closest(".task").dataset.tid;
+      st[tid]=st[tid]||{}; st[tid].status=e.target.value;
+      save(); updateStyles(); updateTimeline(); updateProgress();
+    });
+    qa(".d-sel").forEach(el=>el.onchange=e=>{
+      const tid=e.target.closest(".task").dataset.tid;
+      st[tid]=st[tid]||{}; st[tid].date=e.target.value; save();
+    });
+    qa(".n-inp").forEach(el=>el.oninput=e=>{
+      const tid=e.target.closest(".task").dataset.tid;
+      st[tid]=st[tid]||{}; st[tid].notes=e.target.value; save();
+    });
+  }
+
+  function updateTimeline(){
+    const val=$("asmDate")?.value;
+    const w=$("win90"),dl=$("daysLeft"),tl=$("tlBox");
+    if(!val){
+      if(w)w.textContent="—"; if(dl)dl.textContent="—";
+      if(tl)tl.textContent="Defina a data da assembleia para activar a timeline.";
+      qa(".phase-range").forEach(el=>el.textContent="—");
+      qa(".task-hint").forEach(el=>el.textContent="");
+      qa(".task").forEach(el=>el.classList.remove("overdue","ontrack","upcoming"));
+      return;
+    }
+    const asm=new Date(val+"T00:00:00");
+    const today=new Date(); today.setHours(0,0,0,0);
+    const s90=shift(asm,-90);
+    const diff=Math.ceil((asm-today)/864e5);
+    if(w)w.textContent=fmt(s90);
+    if(dl)dl.textContent=diff>=0?`${diff} dias`:"Realizada";
+
+    qa(".phase").forEach(phEl=>{
+      const pid=phEl.dataset.pid;
+      const pts=D.tasks.filter(t=>t.ph===pid);
+      const rEl=phEl.querySelector(".phase-range");
+      if(!pts.length||!rEl)return;
+      const mn=Math.min(...pts.map(t=>t.s)),mx=Math.max(...pts.map(t=>t.e));
+      const a=shift(asm,mn),b=shift(asm,mx);
+      rEl.textContent=mn===mx?`📅 ${fmt(a)}`:`📅 ${fmt(a)} → ${fmt(b)}`;
+    });
+
+    qa(".task").forEach(el=>{
+      const id=el.dataset.tid,t=byId(id),hint=el.querySelector(".task-hint"),s=ts(id);
+      if(!t||!hint)return;
+      const a=shift(asm,t.s),b=shift(asm,t.e);
+      el.classList.remove("overdue","ontrack","upcoming");
+      let info="";
+      if(s.status==="concluido"){info="✅ Concluída";}
+      else if(today<a){info=`⏳ Começa em ${Math.ceil((a-today)/864e5)} dia(s)`;el.classList.add("upcoming");}
+      else if(today<=b){info=`🟡 Em prazo · ${Math.ceil((b-today)/864e5)} dia(s)`;el.classList.add("ontrack");}
+      else{info=`❌ Atrasada há ${Math.ceil((today-b)/864e5)} dia(s)`;el.classList.add("overdue");}
+      hint.textContent=t.s===t.e?`${fmt(a)} · ${info}`:`${fmt(a)} → ${fmt(b)} · ${info}`;
+    });
+  }
+
+  function updateStyles(){
+    qa(".task").forEach(el=>{
+      const s=ts(el.dataset.tid).status||"pendente";
+      el.classList.remove("done","inp");
+      if(s==="concluido")el.classList.add("done");
+      else if(s==="emcurso")el.classList.add("inp");
+      const depEl=el.querySelector(".task-dep");
+      const deps=D.deps[el.dataset.tid]||[];
+      if(!depEl)return;
+      if(!deps.length){depEl.textContent="";return;}
+      const pend=deps.filter(d=>ts(d).status!=="concluido");
+      depEl.textContent=pend.length?`⚠ Dependências em falta: ${pend.join(", ")}`:`✔ Dependências OK: ${deps.join(", ")}`;
+    });
+  }
+
+  function updateProgress(){
+    let done=0,inp=0,pend=0,late=0,onT=0,soon=0,blocked=false;
+    const risks=[];
+    const val=$("asmDate")?.value;
+    const asm=val?new Date(val+"T00:00:00"):null;
+    const today=new Date(); today.setHours(0,0,0,0);
+
+    D.tasks.forEach(t=>{
+      const s=ts(t.id).status||"pendente";
+      if(s==="concluido")done++;
+      else if(s==="emcurso")inp++;
+      else pend++;
+      if(!asm||s==="concluido")return;
+      const a=shift(asm,t.s),b=shift(asm,t.e);
+      if(today<a)soon++;
+      else if(today<=b)onT++;
+      else{late++;if(t.pri==="alta"){blocked=true;risks.push(`${t.id} atrasada`);}}
+      const deps=D.deps[t.id]||[];
+      if((s==="emcurso"||s==="concluido")&&deps.length){
+        const inv=deps.filter(d=>ts(d).status!=="concluido");
+        if(inv.length){blocked=true;risks.push(`${t.id} depende de ${inv.join(",")}`)}
+      }
+    });
+
+    const total=D.tasks.length,pct=total?Math.round(done/total*100):0;
+    const sv=id=>{const el=$(id);if(el)el.textContent=id==="kPct"?`${pct}%`:id==="kDone"?done:id==="kInP"?inp:id==="kPend"?pend:late};
+    ["kPct","kDone","kInP","kPend","kLate"].forEach(sv);
+
+    qa(".phase").forEach(phEl=>{
+      const cards=qa(".task",phEl);
+      const p=cards.length?Math.round(cards.filter(c=>ts(c.dataset.tid).status==="concluido").length/cards.length*100):0;
+      const f=phEl.querySelector(".phase-fill"),l=phEl.querySelector(".phase-pct");
+      if(f)f.style.width=`${p}%`; if(l)l.textContent=`${p}%`;
+    });
+
+    const tl=$("tlBox");
+    if(tl){
+      if(!asm){tl.textContent="Defina a data para activar a timeline.";tl.style.color="var(--muted)";}
+      else if(blocked){tl.textContent=`⚠️ Atrasadas: ${late} · Em prazo: ${onT} · Próximas: ${soon}`;tl.style.color="var(--danger)";}
+      else{tl.textContent=`✅ Em prazo: ${onT} · Próximas: ${soon} · Atrasadas: ${late}`;tl.style.color="var(--success)";}
+    }
+    const rb=$("risk"),rt=$("riskTxt");
+    if(rb){blocked?rb.classList.add("on"):rb.classList.remove("on");}
+    if(rt&&blocked)rt.textContent=risks.slice(0,4).join(" · ");
+  }
+
+  function bindTabs(){
+    qa(".tab-btn").forEach(btn=>btn.onclick=()=>{
+      const v=btn.dataset.v;
+      st.__view=v; save();
+      qa(".tab-btn").forEach(b=>b.classList.toggle("active",b.dataset.v===v));
+      board(v);
+    });
+  }
+
+  function bindDate(){
+    const inp=$("asmDate"); if(!inp)return;
+    if(st.__date)inp.value=st.__date;
+    inp.onchange=()=>{st.__date=inp.value;save();updateTimeline();updateStyles();updateProgress();};
+  }
+
+  function bindReset(){
+    const btn=$("resetBtn"); if(!btn)return;
+    btn.onclick=()=>{
+      if(!confirm("Limpar todos os dados?"))return;
+      Store.clear(); Object.keys(st).forEach(k=>delete st[k]); init();
+    };
+  }
+
+  function init(){
+    shell(); bindTabs(); bindDate(); bindReset();
+    const v=st.__view||"all";
+    qa(".tab-btn").forEach(b=>b.classList.toggle("active",b.dataset.v===v));
+    board(v);
+  }
+
+  document.addEventListener("DOMContentLoaded",init);
+})();
+</script>
+</body>
+</html>
