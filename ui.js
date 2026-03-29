@@ -79,7 +79,24 @@ window.UI = (() => {
         </div>
 
         <div class="p-3 sm:p-4 md:p-6 bg-slate-50 border-b border-slate-200">
-          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-[1.2fr_1fr_1fr] gap-3 md:gap-4 mb-4">
+          <div class="flex flex-wrap gap-3 items-center mb-4">
+            <div class="w-full overflow-x-auto no-scrollbar">
+              <div id="viewTabs" class="inline-flex min-w-max gap-2 rounded-2xl bg-white border border-slate-200 p-2 shadow-sm">
+                <button type="button" class="tab-btn bg-blue-700 text-white rounded-xl px-4 py-2.5 text-sm font-semibold border border-blue-700 whitespace-nowrap" data-view="all" aria-selected="true">Ver Tudo</button>
+                <button type="button" class="tab-btn bg-white text-slate-700 rounded-xl px-4 py-2.5 text-sm font-semibold border border-slate-200 whitespace-nowrap" data-view="igreja" aria-selected="false">Igreja Local</button>
+                <button type="button" class="tab-btn bg-white text-slate-700 rounded-xl px-4 py-2.5 text-sm font-semibold border border-slate-200 whitespace-nowrap" data-view="ministros" aria-selected="false">Pastores / Ministros</button>
+                <button type="button" class="tab-btn bg-white text-slate-700 rounded-xl px-4 py-2.5 text-sm font-semibold border border-slate-200 whitespace-nowrap" data-view="sd" aria-selected="false">Superintendente</button>
+                <button type="button" class="tab-btn bg-white text-slate-700 rounded-xl px-4 py-2.5 text-sm font-semibold border border-slate-200 whitespace-nowrap" data-view="juntas" aria-selected="false">Juntas</button>
+                <button type="button" class="tab-btn bg-white text-slate-700 rounded-xl px-4 py-2.5 text-sm font-semibold border border-slate-200 whitespace-nowrap" data-view="day" aria-selected="false">Modo Dia</button>
+              </div>
+            </div>
+
+            <button type="button" id="resetDataBtn" class="bg-white hover:bg-red-50 text-red-700 rounded-2xl px-4 py-2.5 text-sm font-semibold border border-red-200 w-full sm:w-auto">
+              Limpar Dados
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-[1.2fr_1fr_1fr] gap-3 md:gap-4">
             <div id="riskBanner" class="hidden sm:col-span-2 xl:col-span-3 rounded-2xl border border-red-300 bg-red-50 p-3 md:p-4 text-red-800">
               <div class="font-bold text-sm md:text-base">Risco operacional</div>
               <div id="riskBannerText" class="text-xs md:text-sm mt-1">Existem tarefas críticas pendentes.</div>
@@ -114,23 +131,6 @@ window.UI = (() => {
                 Defina a data da assembleia para activar a timeline.
               </p>
             </div>
-          </div>
-
-          <div class="flex flex-wrap gap-3 items-center">
-            <div class="w-full overflow-x-auto no-scrollbar">
-              <div id="viewTabs" class="inline-flex min-w-max gap-2 rounded-2xl bg-white border border-slate-200 p-2 shadow-sm">
-                <button type="button" class="tab-btn bg-blue-700 text-white rounded-xl px-4 py-2.5 text-sm font-semibold border border-blue-700 whitespace-nowrap" data-view="all" aria-selected="true">Ver Tudo</button>
-                <button type="button" class="tab-btn bg-white text-slate-700 rounded-xl px-4 py-2.5 text-sm font-semibold border border-slate-200 whitespace-nowrap" data-view="igreja" aria-selected="false">Igreja Local</button>
-                <button type="button" class="tab-btn bg-white text-slate-700 rounded-xl px-4 py-2.5 text-sm font-semibold border border-slate-200 whitespace-nowrap" data-view="ministros" aria-selected="false">Pastores / Ministros</button>
-                <button type="button" class="tab-btn bg-white text-slate-700 rounded-xl px-4 py-2.5 text-sm font-semibold border border-slate-200 whitespace-nowrap" data-view="sd" aria-selected="false">Superintendente</button>
-                <button type="button" class="tab-btn bg-white text-slate-700 rounded-xl px-4 py-2.5 text-sm font-semibold border border-slate-200 whitespace-nowrap" data-view="juntas" aria-selected="false">Juntas</button>
-                <button type="button" class="tab-btn bg-white text-slate-700 rounded-xl px-4 py-2.5 text-sm font-semibold border border-slate-200 whitespace-nowrap" data-view="day" aria-selected="false">Modo Dia</button>
-              </div>
-            </div>
-
-            <button type="button" id="resetDataBtn" class="bg-white hover:bg-red-50 text-red-700 rounded-2xl px-4 py-2.5 text-sm font-semibold border border-red-200 w-full sm:w-auto">
-              Limpar Dados
-            </button>
           </div>
         </div>
 
