@@ -15,52 +15,67 @@
     return d;
   }
 
-  function getTaskState(taskId) {
-    return state[taskId] || { status: "pendente", date: "", notes: "" };
+  function getTaskById(id) {
+    return APP_DATA.tasks.find(t => t.id === id);
   }
 
-  function setActiveTab(button) {
-    document.querySelectorAll(".tab-btn").forEach(btn => {
-      btn.classList.remove("bg-blue-700", "text-white", "border-blue-700", "shadow-sm", "scale-[1.02]");
-      btn.classList.add("bg-white", "text-slate-700", "border-slate-200");
-      btn.setAttribute("aria-selected", "false");
-    });
+  function getTaskState(id) {
+    return state[id] || { status: "pendente", date: "", notes: "" };
+  }
 
-    if (button) {
-      button.classList.remove("bg-white", "text-slate-700", "border-slate-200");
-      button.classList.add("bg-blue-700", "text-white", "border-blue-700", "shadow-sm", "scale-[1.02]");
-      button.setAttribute("aria-selected", "true");
-    }
+  function saveState() {
+    StorageService.save(state);
+  }
+
+  function setActiveTab(view) {
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      const active = btn.dataset.view === view;
+      btn.setAttribute("aria-selected", active ? "true" : "false");
+      btn.classList.remove("bg-blue-700", "text-white", "border-blue-700", "shadow-sm", "scale-[1.02]");
+      btn.classList.remove("bg-white", "text-slate-700", "border-slate-200");
+
+      if (active) {
+        btn.classList.add("bg-blue-700", "text-white", "border-blue-700", "shadow-sm", "scale-[1.02]");
+      } else {
+        btn.classList.add("bg-white", "text-slate-700", "border-slate-200");
+      }
+    });
   }
 
   function renderShell() {
-    document.getElementById("app").innerHTML = UI.shellHtml();
+    document.getElementById("app").innerHTML = UI.shell();
   }
 
-  function renderBoard(view = "all") {
+  function renderBoard(view) {
     const board = document.getElementById("taskBoard");
     const grouped = {};
 
     APP_DATA.tasks.forEach(task => {
-      if (view === "day" && task.phase !== "5") return;
-      if (view !== "all" && view !== "day" && !task.groups.includes(view)) return;
+      const visible =
+        view === "all" ||
+        (view === "day" && task.phase === "5") ||
+        (view !== "all" && view !== "day" && task.groups.includes(view));
+
+      if (!visible) return;
 
       if (!grouped[task.phase]) grouped[task.phase] = [];
       grouped[task.phase].push(task);
     });
 
-    board.innerHTML = Object.keys(APP_DATA.phases)
-      .filter(phaseId => grouped[phaseId] && grouped[phaseId].length)
-      .map(phaseId => {
-        const phase = APP_DATA.phases[phaseId];
-        const colorCfg = UI.colorMap[phase.color];
-        const taskHtml = grouped[phaseId].map(task =>
-          UI.taskCardHtml(task, getTaskState(task.id), phase.color)
-        );
-        return UI.phaseCardHtml({ id: phaseId, ...phase }, taskHtml, colorCfg);
-      })
-      .join("");
+    let html = "";
 
+    Object.keys(APP_DATA.phases).forEach(phaseId => {
+      if (!grouped[phaseId] || !grouped[phaseId].length) return;
+
+      const phase = APP_DATA.phases[phaseId];
+      const tasksHtml = grouped[phaseId]
+        .map(task => UI.taskCard(task, phase.color, getTaskState(task.id)))
+        .join("");
+
+      html += UI.phaseCard(phaseId, phase, tasksHtml);
+    });
+
+    board.innerHTML = html;
     bindPhaseToggles();
     bindTaskInputs();
     updateTimeline();
@@ -70,107 +85,116 @@
 
   function bindPhaseToggles() {
     document.querySelectorAll(".phase-toggle").forEach(btn => {
-      btn.addEventListener("click", () => {
+      btn.onclick = () => {
         const section = btn.closest(".phase-card");
         const content = section.querySelector(".phase-content");
         const icon = section.querySelector(".toggle-icon");
-        const hidden = content.classList.contains("hidden");
-        content.classList.toggle("hidden");
+        const hidden = content.classList.contains("hidden-force");
+        content.classList.toggle("hidden-force");
         icon.textContent = hidden ? "−" : "+";
-      });
+      };
     });
   }
 
   function bindTaskInputs() {
     document.querySelectorAll(".status-select").forEach(el => {
-      el.addEventListener("change", e => {
+      el.onchange = e => {
         const taskId = e.target.closest(".task-card").dataset.taskId;
         state[taskId] = state[taskId] || {};
         state[taskId].status = e.target.value;
-        StorageService.save(state);
+        saveState();
         updateTaskStyles();
         updateTimeline();
         updateProgress();
-      });
+      };
     });
 
     document.querySelectorAll(".date-input").forEach(el => {
-      el.addEventListener("change", e => {
+      el.onchange = e => {
         const taskId = e.target.closest(".task-card").dataset.taskId;
         state[taskId] = state[taskId] || {};
         state[taskId].date = e.target.value;
-        StorageService.save(state);
-      });
+        saveState();
+      };
     });
 
     document.querySelectorAll(".notes-input").forEach(el => {
-      el.addEventListener("input", e => {
+      el.oninput = e => {
         const taskId = e.target.closest(".task-card").dataset.taskId;
         state[taskId] = state[taskId] || {};
         state[taskId].notes = e.target.value;
-        StorageService.save(state);
-      });
+        saveState();
+      };
     });
   }
 
   function updateTimeline() {
     const input = document.getElementById("assemblyDate");
-    const value = input?.value;
+    const value = input.value;
     const startLabel = document.getElementById("windowStartLabel");
-    const remainingLabel = document.getElementById("daysRemainingLabel");
+    const daysLabel = document.getElementById("daysRemainingLabel");
+    const timelineStatus = document.getElementById("timelineStatus");
 
     if (!value) {
       startLabel.textContent = "—";
-      remainingLabel.textContent = "—";
-      document.getElementById("timelineStatus").textContent = "Defina a data da assembleia para activar a timeline.";
+      daysLabel.textContent = "—";
+      timelineStatus.textContent = "Defina a data da assembleia para activar a timeline.";
+
       document.querySelectorAll(".phase-date-range").forEach(el => {
         el.textContent = "Datas calculadas automaticamente após definir a data da assembleia.";
       });
+
       document.querySelectorAll(".task-date-hint").forEach(el => {
         el.textContent = "";
       });
-      document.querySelectorAll(".task-card").forEach(task => {
-        task.classList.remove("ring-2", "ring-red-300", "ring-amber-300", "ring-blue-300");
+
+      document.querySelectorAll(".task-card").forEach(taskEl => {
+        taskEl.classList.remove("ring-2", "ring-red-300", "ring-amber-300", "ring-blue-300");
       });
+
       return;
     }
 
     const assemblyDate = new Date(value + "T00:00:00");
-    const windowStart = shiftDate(assemblyDate, -90);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+
+    const start90 = shiftDate(assemblyDate, -90);
     const diffDays = Math.ceil((assemblyDate - today) / (1000 * 60 * 60 * 24));
 
-    startLabel.textContent = formatDatePT(windowStart);
-    remainingLabel.textContent = diffDays >= 0 ? `${diffDays} dias` : "Assembleia já realizada";
+    startLabel.textContent = formatDatePT(start90);
+    daysLabel.textContent = diffDays >= 0 ? `${diffDays} dias` : "Assembleia já realizada";
 
     document.querySelectorAll(".phase-card").forEach(phaseEl => {
       const phaseId = phaseEl.dataset.phase;
-      const cfg = APP_DATA.phaseDateConfig[phaseId];
+      const cfg = APP_DATA.phases[phaseId];
+      const offset = APP_DATA.phaseDateConfig[phaseId];
       const label = phaseEl.querySelector(".phase-date-range");
-      if (!cfg || !label) return;
+      if (!cfg || !offset || !label) return;
 
-      const start = shiftDate(assemblyDate, cfg.startOffset);
-      const end = shiftDate(assemblyDate, cfg.endOffset);
+      const start = shiftDate(assemblyDate, offset.startOffset);
+      const end = shiftDate(assemblyDate, offset.endOffset);
 
-      label.textContent = cfg.startOffset === cfg.endOffset
+      label.textContent = offset.startOffset === offset.endOffset
         ? `Data exacta: ${formatDatePT(start)}`
         : `Janela recomendada: ${formatDatePT(start)} a ${formatDatePT(end)}`;
     });
 
     document.querySelectorAll(".task-card").forEach(taskEl => {
       const id = taskEl.dataset.taskId;
-      const task = APP_DATA.tasks.find(t => t.id === id);
+      const task = getTaskById(id);
       const hint = taskEl.querySelector(".task-date-hint");
+      const saved = getTaskState(id);
+      const status = saved.status || "pendente";
+
       if (!task || !hint) return;
 
       const start = shiftDate(assemblyDate, task.startOffset);
       const end = shiftDate(assemblyDate, task.endOffset);
-      const saved = getTaskState(id);
-      const status = saved.status || "pendente";
+
+      taskEl.classList.remove("ring-2", "ring-red-300", "ring-amber-300", "ring-blue-300");
 
       let timelineState = "";
-      taskEl.classList.remove("ring-2", "ring-red-300", "ring-amber-300", "ring-blue-300");
 
       if (status === "concluido") {
         timelineState = "✔ Concluída";
@@ -197,27 +221,21 @@
   function updateTaskStyles() {
     document.querySelectorAll(".task-card").forEach(taskEl => {
       const id = taskEl.dataset.taskId;
+      const task = getTaskById(id);
       const saved = getTaskState(id);
       const status = saved.status || "pendente";
 
       taskEl.classList.remove(
-        "border-slate-300",
-        "border-amber-300",
-        "border-green-300",
-        "bg-white",
-        "bg-amber-50",
-        "bg-green-50",
-        "border-red-400",
-        "bg-red-50"
+        "border-slate-300", "border-amber-300", "border-green-300",
+        "bg-white", "bg-amber-50", "bg-green-50",
+        "border-red-400", "bg-red-50"
       );
-
-      const task = APP_DATA.tasks.find(t => t.id === id);
 
       if (status === "concluido") {
         taskEl.classList.add("border-green-300", "bg-green-50");
       } else if (status === "emcurso") {
         taskEl.classList.add("border-amber-300", "bg-amber-50");
-      } else if (task?.priority === "alta") {
+      } else if (task && task.priority === "alta") {
         taskEl.classList.add("border-red-400", "bg-red-50");
       } else {
         taskEl.classList.add("border-slate-300", "bg-white");
@@ -227,15 +245,13 @@
       const deps = APP_DATA.dependencies[id] || [];
 
       if (!depHint) return;
+
       if (!deps.length) {
         depHint.textContent = "";
         return;
       }
 
-      const pending = deps.filter(depId => {
-        const depState = getTaskState(depId);
-        return depState.status !== "concluido";
-      });
+      const pending = deps.filter(depId => getTaskState(depId).status !== "concluido");
 
       depHint.textContent = pending.length
         ? `Dependências em falta: ${pending.join(", ")}`
@@ -245,20 +261,25 @@
 
   function updateProgress() {
     let blocked = false;
-    const riskMessages = [];
     let overdueCount = 0;
     let upcomingCount = 0;
     let onTrackCount = 0;
+    const riskMessages = [];
 
-    const assemblyValue = document.getElementById("assemblyDate")?.value;
+    const value = document.getElementById("assemblyDate").value;
+    const banner = document.getElementById("riskBanner");
+    const bannerText = document.getElementById("riskBannerText");
+    const timelineStatus = document.getElementById("timelineStatus");
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const assemblyDate = assemblyValue ? new Date(assemblyValue + "T00:00:00") : null;
+
+    const assemblyDate = value ? new Date(value + "T00:00:00") : null;
 
     document.querySelectorAll(".phase-card").forEach(phaseEl => {
-      const phaseTasks = [...phaseEl.querySelectorAll(".task-card")];
-      const total = phaseTasks.length;
-      const done = phaseTasks.filter(card => {
+      const cards = [...phaseEl.querySelectorAll(".task-card")];
+      const total = cards.length;
+      const done = cards.filter(card => {
         const id = card.dataset.taskId;
         return getTaskState(id).status === "concluido";
       }).length;
@@ -266,17 +287,17 @@
       const percent = total ? Math.round((done / total) * 100) : 0;
       const bar = phaseEl.querySelector(".progress-bar");
       const label = phaseEl.querySelector(".progress-label");
+
       if (bar) bar.style.width = `${percent}%`;
       if (label) label.textContent = `${percent}% concluído`;
 
-      phaseTasks.forEach(card => {
+      cards.forEach(card => {
         const id = card.dataset.taskId;
-        const task = APP_DATA.tasks.find(t => t.id === id);
+        const task = getTaskById(id);
         const saved = getTaskState(id);
         const status = saved.status || "pendente";
 
-        if (status === "concluido") return;
-        if (!assemblyDate || !task) return;
+        if (!assemblyDate || !task || status === "concluido") return;
 
         const start = shiftDate(assemblyDate, task.startOffset);
         const end = shiftDate(assemblyDate, task.endOffset);
@@ -304,33 +325,27 @@
       });
     });
 
-    const statusEl = document.getElementById("timelineStatus");
-    const banner = document.getElementById("riskBanner");
-    const bannerText = document.getElementById("riskBannerText");
-
     if (blocked) {
-      statusEl.textContent = `⚠️ Atrasadas: ${overdueCount} · Dentro do prazo: ${onTrackCount} · Próximas: ${upcomingCount}`;
-      statusEl.classList.add("text-red-600", "font-bold");
+      timelineStatus.textContent = `⚠️ Atrasadas: ${overdueCount} · Dentro do prazo: ${onTrackCount} · Próximas: ${upcomingCount}`;
+      timelineStatus.classList.add("text-red-600", "font-bold");
       banner.classList.remove("hidden");
-      bannerText.textContent = riskMessages.length
-        ? riskMessages.slice(0, 4).join(" · ")
-        : "Existem tarefas críticas em situação de risco.";
+      bannerText.textContent = riskMessages.slice(0, 4).join(" · ");
     } else {
-      statusEl.textContent = `✅ Dentro do prazo: ${onTrackCount} · Próximas: ${upcomingCount} · Atrasadas: ${overdueCount}`;
-      statusEl.classList.remove("text-red-600", "font-bold");
+      timelineStatus.textContent = `✅ Dentro do prazo: ${onTrackCount} · Próximas: ${upcomingCount} · Atrasadas: ${overdueCount}`;
+      timelineStatus.classList.remove("text-red-600", "font-bold");
       banner.classList.add("hidden");
     }
   }
 
   function bindTabs() {
-    const tabs = document.querySelectorAll(".tab-btn");
-    tabs.forEach(btn => {
-      btn.addEventListener("click", () => {
-        setActiveTab(btn);
-        state.__activeView = btn.dataset.view;
-        StorageService.save(state);
-        renderBoard(btn.dataset.view);
-      });
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.onclick = () => {
+        const view = btn.dataset.view;
+        state.__activeView = view;
+        saveState();
+        setActiveTab(view);
+        renderBoard(view);
+      };
     });
   }
 
@@ -338,41 +353,37 @@
     const input = document.getElementById("assemblyDate");
     if (state.__assemblyDate) input.value = state.__assemblyDate;
 
-    input.addEventListener("change", () => {
+    input.onchange = () => {
       state.__assemblyDate = input.value;
-      StorageService.save(state);
-      const activeView = state.__activeView || "all";
-      renderBoard(activeView);
-    });
+      saveState();
+      renderBoard(state.__activeView || "all");
+    };
   }
 
   function bindReset() {
-    const btn = document.getElementById("resetDataBtn");
-    btn.addEventListener("click", () => {
+    document.getElementById("resetDataBtn").onclick = () => {
       const ok = confirm("Tem a certeza que quer limpar todos os estados, datas e observações?");
       if (!ok) return;
       StorageService.clear();
       Object.keys(state).forEach(k => delete state[k]);
-      render();
-    });
+      renderApp();
+    };
   }
 
-  function render() {
+  function renderApp() {
     renderShell();
     bindTabs();
     bindAssemblyDate();
     bindReset();
 
-    const activeView = state.__activeView || "all";
-    const activeButton = document.querySelector(`.tab-btn[data-view="${activeView}"]`) ||
-      document.querySelector(`.tab-btn[data-view="all"]`);
-    setActiveTab(activeButton);
-    renderBoard(activeView);
+    const view = state.__activeView || "all";
+    setActiveTab(view);
+    renderBoard(view);
   }
 
   function renderShell() {
-    document.getElementById("app").innerHTML = UI.shellHtml();
+    document.getElementById("app").innerHTML = UI.shell();
   }
 
-  document.addEventListener("DOMContentLoaded", render);
+  document.addEventListener("DOMContentLoaded", renderApp);
 })();
