@@ -1,65 +1,20 @@
-body {
-  font-family: Arial;
-  background: #f5f7fa;
-  margin: 0;
-}
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Assembleia Distrital</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen">
+  <div class="max-w-7xl mx-auto p-4 md:p-6">
+    <div id="app"></div>
+  </div>
 
-.container {
-  max-width: 1000px;
-  margin: auto;
-  padding: 20px;
-}
-
-h1 {
-  text-align: center;
-}
-
-.date-box {
-  margin: 20px 0;
-}
-
-.tabs {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.tab {
-  flex: 1;
-  padding: 12px;
-  border: none;
-  background: #ddd;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.tab.active {
-  background: #007bff;
-  color: white;
-}
-
-.task {
-  background: white;
-  padding: 12px;
-  margin-bottom: 10px;
-  border-radius: 8px;
-}
-
-.status {
-  margin-top: 5px;
-}
-
-.badge {
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 12px;
-}
-
-.pendente { background: #ccc; }
-.emcurso { background: orange; }
-.concluida { background: green; color: white; }
-
-input, textarea {
-  width: 100%;
-  margin-top: 5px;
-}
+  <script src="data.js"></script>
+  <script src="storage.js"></script>
+  <script src="ui.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
