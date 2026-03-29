@@ -1,4 +1,6 @@
-.tab-btn {
+.tab-btn,
+.phase-card,
+.task-card {
   transition: all 0.2s ease;
 }
 
@@ -6,11 +8,6 @@
   transform: scale(1.02);
 }
 
-.task-card,
-.phase-card {
-  transition: all 0.2s ease;
-}
-
-.hidden {
+.hidden-force {
   display: none !important;
 }
