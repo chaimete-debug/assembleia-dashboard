@@ -323,15 +323,28 @@
       if (!wrapper) return;
 
       if (adminUnlocked) {
-        wrapper.innerHTML = `<input id="assemblyDateHeader" type="date"
-          class="w-full rounded-xl border border-white/30 bg-white/90 text-slate-800 px-3 py-2 text-xs sm:text-sm outline-none" />`;
-        const inp = document.getElementById("assemblyDateHeader");
-        inp.value = state.__assemblyDate || "";
-        inp.onchange = () => {
-          state.__assemblyDate = inp.value;
-          saveState();
-          renderCurrentView();
-        };
+        // Só recriar o input se ainda não existir (evita destruir o campo enquanto o utilizador está a escrever)
+        if (!document.getElementById("assemblyDateHeader")) {
+          wrapper.innerHTML = `<input id="assemblyDateHeader" type="date"
+            class="w-full rounded-xl border border-white/30 bg-white/90 text-slate-800 px-3 py-2 text-xs sm:text-sm outline-none" />`;
+          const inp = document.getElementById("assemblyDateHeader");
+          inp.value = state.__assemblyDate || "";
+          inp.addEventListener("change", () => {
+            state.__assemblyDate = inp.value;
+            saveState();
+            updateTimeline();
+            updateTaskStyles();
+            updateProgress();
+            // Actualizar apenas o painel de visão geral se estiver visível, sem recriar o header
+            if ((state.__activeView || "overview") === "overview") renderOverview();
+          });
+        } else {
+          // Input já existe — apenas sincronizar o valor se diferente
+          const inp = document.getElementById("assemblyDateHeader");
+          if (inp.value !== (state.__assemblyDate || "")) {
+            inp.value = state.__assemblyDate || "";
+          }
+        }
       } else {
         const dateStr = state.__assemblyDate
           ? new Date(state.__assemblyDate + "T00:00:00").toLocaleDateString("pt-PT", { day: "2-digit", month: "long", year: "numeric" })
