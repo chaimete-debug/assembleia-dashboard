@@ -48,11 +48,30 @@
                   </div>
 
                   <div class="bg-white/15 rounded-2xl p-3 backdrop-blur">
-                    <div class="font-semibold">Data da Assembleia Distrital</div>
-                    <div class="mt-2">
-                      <input id="assemblyDateHeader"
-                        type="date"
-                        class="w-full rounded-xl border border-white/30 bg-white/90 text-slate-800 px-3 py-2 text-xs sm:text-sm outline-none" />
+                    <div class="flex items-center justify-between gap-2">
+                      <div class="font-semibold text-sm">Data da Assembleia</div>
+                      <button id="adminLockBtn" type="button" onclick="handleAdminLock()"
+                        class="text-[10px] px-2 py-1 rounded-full bg-white/20 hover:bg-white/30 transition-colors font-semibold tracking-wide"
+                        title="Acesso de administrador">🔒 Admin</button>
+                    </div>
+                    <div class="mt-2" id="dateFieldWrapper">
+                      <!-- Preenchido por syncHeaderDateInput() -->
+                    </div>
+                  </div>
+
+                  <!-- Modal PIN -->
+                  <div id="pinModal" class="hidden fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div class="bg-white rounded-3xl shadow-2xl p-6 w-full max-w-xs text-slate-800">
+                      <h2 id="pinModalTitle" class="text-base font-extrabold mb-1">Acesso de Administrador</h2>
+                      <p id="pinModalDesc" class="text-xs text-slate-500 mb-4">Introduza o PIN do Superintendente Distrital para alterar a data da Assembleia.</p>
+                      <input id="pinInput" type="password" inputmode="numeric" maxlength="8" placeholder="PIN"
+                        class="w-full rounded-xl border border-slate-300 px-4 py-3 text-center text-xl tracking-widest outline-none focus:ring-2 focus:ring-sky-400 mb-2" />
+                      <p id="pinError" class="text-xs text-rose-600 text-center mb-3 min-h-[1rem]"></p>
+                      <div class="flex gap-2">
+                        <button type="button" onclick="closePinModal()" class="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancelar</button>
+                        <button type="button" onclick="submitPin()" class="flex-1 rounded-xl bg-sky-500 text-white py-2.5 text-sm font-bold hover:bg-sky-600">Confirmar</button>
+                      </div>
+                      <p id="pinSetupHint" class="hidden text-[11px] text-slate-400 text-center mt-3">Esta é a primeira configuração. Este PIN ficará guardado e será necessário para futuras alterações.</p>
                     </div>
                   </div>
                 </div>
@@ -184,15 +203,143 @@
       });
     }
 
+    // ── Administrador / PIN ────────────────────────────────────────
+    // O PIN é guardado em localStorage como hash SHA-256 (hex).
+    // adminUnlocked é uma flag de sessão (memória), não persiste.
+    let adminUnlocked = false;
+    let pinModalCallback = null; // função a chamar após PIN válido
+
+    async function sha256hex(str) {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    function getStoredPinHash() {
+      return localStorage.getItem("dashboard_admin_pin_hash") || null;
+    }
+
+    function openPinModal(callback, isChange = false) {
+      pinModalCallback = callback;
+      const modal = document.getElementById("pinModal");
+      const title = document.getElementById("pinModalTitle");
+      const desc = document.getElementById("pinModalDesc");
+      const hint = document.getElementById("pinSetupHint");
+      const err = document.getElementById("pinError");
+      const input = document.getElementById("pinInput");
+      const hasPinStored = !!getStoredPinHash();
+
+      err.textContent = "";
+      input.value = "";
+
+      if (!hasPinStored) {
+        title.textContent = "Definir PIN de Administrador";
+        desc.textContent = "Crie um PIN numérico (4–8 dígitos) para proteger a data da Assembleia. Guarde-o em local seguro.";
+        hint.classList.remove("hidden");
+      } else if (isChange) {
+        title.textContent = "Alterar PIN";
+        desc.textContent = "Introduza o PIN actual para confirmar a alteração.";
+        hint.classList.add("hidden");
+      } else {
+        title.textContent = "Acesso de Administrador";
+        desc.textContent = "Introduza o PIN do Superintendente Distrital para alterar a data da Assembleia.";
+        hint.classList.add("hidden");
+      }
+
+      modal.classList.remove("hidden");
+      setTimeout(() => input.focus(), 80);
+
+      input.onkeydown = e => { if (e.key === "Enter") submitPin(); };
+    }
+
+    function closePinModal() {
+      document.getElementById("pinModal").classList.add("hidden");
+      document.getElementById("pinInput").value = "";
+      document.getElementById("pinError").textContent = "";
+      pinModalCallback = null;
+    }
+
+    async function submitPin() {
+      const input = document.getElementById("pinInput");
+      const err = document.getElementById("pinError");
+      const pin = input.value.trim();
+
+      if (pin.length < 4 || !/^\d+$/.test(pin)) {
+        err.textContent = "O PIN deve ter entre 4 e 8 dígitos numéricos.";
+        return;
+      }
+
+      const hash = await sha256hex(pin);
+      const stored = getStoredPinHash();
+
+      if (!stored) {
+        // Primeiro uso — guardar PIN
+        localStorage.setItem("dashboard_admin_pin_hash", hash);
+        adminUnlocked = true;
+        closePinModal();
+        if (pinModalCallback) pinModalCallback();
+      } else {
+        if (hash === stored) {
+          adminUnlocked = true;
+          closePinModal();
+          if (pinModalCallback) pinModalCallback();
+        } else {
+          err.textContent = "PIN incorrecto. Tente novamente.";
+          input.value = "";
+          input.focus();
+        }
+      }
+    }
+
+    function handleAdminLock() {
+      if (adminUnlocked) {
+        // Bloquear sessão
+        adminUnlocked = false;
+        syncHeaderDateInput();
+        updateAdminLockBtn();
+      } else {
+        openPinModal(() => {
+          syncHeaderDateInput();
+          updateAdminLockBtn();
+        });
+      }
+    }
+
+    function updateAdminLockBtn() {
+      const btn = document.getElementById("adminLockBtn");
+      if (!btn) return;
+      if (adminUnlocked) {
+        btn.textContent = "🔓 Bloquear";
+        btn.classList.add("bg-amber-400/80");
+        btn.classList.remove("bg-white/20");
+      } else {
+        btn.textContent = "🔒 Admin";
+        btn.classList.remove("bg-amber-400/80");
+        btn.classList.add("bg-white/20");
+      }
+    }
+
     function syncHeaderDateInput() {
-      const headerInput = document.getElementById("assemblyDateHeader");
-      if (!headerInput) return;
-      headerInput.value = state.__assemblyDate || "";
-      headerInput.onchange = () => {
-        state.__assemblyDate = headerInput.value;
-        saveState();
-        renderCurrentView();
-      };
+      const wrapper = document.getElementById("dateFieldWrapper");
+      if (!wrapper) return;
+
+      if (adminUnlocked) {
+        wrapper.innerHTML = `<input id="assemblyDateHeader" type="date"
+          class="w-full rounded-xl border border-white/30 bg-white/90 text-slate-800 px-3 py-2 text-xs sm:text-sm outline-none" />`;
+        const inp = document.getElementById("assemblyDateHeader");
+        inp.value = state.__assemblyDate || "";
+        inp.onchange = () => {
+          state.__assemblyDate = inp.value;
+          saveState();
+          renderCurrentView();
+        };
+      } else {
+        const dateStr = state.__assemblyDate
+          ? new Date(state.__assemblyDate + "T00:00:00").toLocaleDateString("pt-PT", { day: "2-digit", month: "long", year: "numeric" })
+          : "Não definida";
+        wrapper.innerHTML = `<div class="text-sm font-bold text-white leading-snug mt-1">${dateStr}</div>
+          <div class="text-[10px] text-cyan-100 mt-0.5">Apenas o administrador pode alterar</div>`;
+      }
+      updateAdminLockBtn();
     }
 
     function computeMetrics() {
