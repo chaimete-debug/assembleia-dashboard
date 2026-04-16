@@ -54,10 +54,18 @@
                         class="text-[10px] px-2 py-1 rounded-full bg-white/20 hover:bg-white/30 transition-colors font-semibold tracking-wide"
                         title="Acesso de administrador">🔒 Admin</button>
                     </div>
-                    <div class="mt-2" id="dateFieldWrapper">
-                      <!-- Preenchido por syncHeaderDateInput() -->
-                    </div>
-                  </div>
+                    <div class="mt-2">
+                      <!-- Estado desbloqueado: input de data -->
+                      <div id="dateUnlockedWrapper">
+                        <input id="assemblyDateHeader" type="date"
+                          class="w-full rounded-xl border border-white/30 bg-white/90 text-slate-800 px-3 py-2 text-xs sm:text-sm outline-none" />
+                      </div>
+                      <!-- Estado bloqueado: texto legível -->
+                      <div id="dateLockedWrapper" class="hidden">
+                        <div id="assemblyDateDisplay" class="text-sm font-bold text-white leading-snug mt-1">Não definida</div>
+                        <div class="text-[10px] text-cyan-100 mt-0.5">Apenas o administrador pode alterar</div>
+                      </div>
+                    </div>                  </div>
 
                   <!-- Modal PIN -->
                   <div id="pinModal" class="hidden fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
@@ -319,40 +327,48 @@
     }
 
     function syncHeaderDateInput() {
-      const wrapper = document.getElementById("dateFieldWrapper");
-      if (!wrapper) return;
+      const unlockedWrapper = document.getElementById("dateUnlockedWrapper");
+      const lockedWrapper   = document.getElementById("dateLockedWrapper");
+      const inp             = document.getElementById("assemblyDateHeader");
+      const display         = document.getElementById("assemblyDateDisplay");
+      if (!unlockedWrapper || !lockedWrapper || !inp) return;
 
       if (adminUnlocked) {
-        // Só recriar o input se ainda não existir (evita destruir o campo enquanto o utilizador está a escrever)
-        if (!document.getElementById("assemblyDateHeader")) {
-          wrapper.innerHTML = `<input id="assemblyDateHeader" type="date"
-            class="w-full rounded-xl border border-white/30 bg-white/90 text-slate-800 px-3 py-2 text-xs sm:text-sm outline-none" />`;
-          const inp = document.getElementById("assemblyDateHeader");
+        unlockedWrapper.classList.remove("hidden");
+        lockedWrapper.classList.add("hidden");
+        // Sincronizar valor sem destruir o input
+        if (inp.value !== (state.__assemblyDate || "")) {
           inp.value = state.__assemblyDate || "";
-          inp.addEventListener("change", () => {
-            state.__assemblyDate = inp.value;
-            saveState();
-            updateTimeline();
-            updateTaskStyles();
-            updateProgress();
-            // Actualizar apenas o painel de visão geral se estiver visível, sem recriar o header
-            if ((state.__activeView || "overview") === "overview") renderOverview();
-          });
-        } else {
-          // Input já existe — apenas sincronizar o valor se diferente
-          const inp = document.getElementById("assemblyDateHeader");
-          if (inp.value !== (state.__assemblyDate || "")) {
-            inp.value = state.__assemblyDate || "";
-          }
         }
       } else {
-        const dateStr = state.__assemblyDate
-          ? new Date(state.__assemblyDate + "T00:00:00").toLocaleDateString("pt-PT", { day: "2-digit", month: "long", year: "numeric" })
-          : "Não definida";
-        wrapper.innerHTML = `<div class="text-sm font-bold text-white leading-snug mt-1">${dateStr}</div>
-          <div class="text-[10px] text-cyan-100 mt-0.5">Apenas o administrador pode alterar</div>`;
+        unlockedWrapper.classList.add("hidden");
+        lockedWrapper.classList.remove("hidden");
+        if (display) {
+          display.textContent = state.__assemblyDate
+            ? new Date(state.__assemblyDate + "T00:00:00").toLocaleDateString("pt-PT", { day: "2-digit", month: "long", year: "numeric" })
+            : "Não definida";
+        }
       }
       updateAdminLockBtn();
+    }
+
+    // Ligar o evento de data uma única vez após o DOM estar pronto
+    function bindDateInput() {
+      const inp = document.getElementById("assemblyDateHeader");
+      if (!inp) return;
+      inp.addEventListener("change", () => {
+        state.__assemblyDate = inp.value;
+        saveState();
+        updateTimeline();
+        updateTaskStyles();
+        updateProgress();
+        if ((state.__activeView || "overview") === "overview") renderOverview();
+        // Actualizar texto bloqueado para a próxima vez que bloquear
+        const display = document.getElementById("assemblyDateDisplay");
+        if (display && inp.value) {
+          display.textContent = new Date(inp.value + "T00:00:00").toLocaleDateString("pt-PT", { day: "2-digit", month: "long", year: "numeric" });
+        }
+      });
     }
 
     function computeMetrics() {
@@ -895,6 +911,7 @@
       if (!state.__activeView) state.__activeView = "overview";
       saveState();
       bindTabs();
+      bindDateInput();
       renderCurrentView();
     }
 
